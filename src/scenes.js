@@ -1,17 +1,17 @@
 import {members, insights} from './team.js';
 export const initialState={scene:'connections',memberId:null,place:0,chapter:0,insight:0};
 export function chapters(member){
- const list=[{title:'My communities',text:member.communities.join(' · ')}];
+ const list=[{title:'My communities',text:member.communityStory||member.communities.join(' · ')}];
  if(member.story)list.push({title:'What shaped me',text:member.story.replace('Her supplied New York connections','Her New York connections')});
  // The supplied belonging field is retained as an editorial summary, not a quote.
  if(member.belonging)list.push({title:'What belonging means to me',text:member.belonging});
  return list;
 }
 export const sharedInsights=[
- {title:'Communities we share',text:'Ricardo, Christina and Ibrahim share Year Up United. New York also connects Ricardo, Christina, Jenny and Ibrahim through Queens, the Bronx and Brooklyn.'},
+ {title:'Communities we share',text:'Ricardo, Christina and Ibrahim share Year Up United. New York also connects Ricardo, Christina, Jenny, Ibrahim and Yense through Queens, the Bronx and Brooklyn.'},
  {title:'Experiences that make us different',text:insights[2].text},
  {title:'What helps us belong',text:insights[3].text},
- {title:'What we can bring into the workplace',text:'Ricardo brings observation, feedback, and persistence. Christina practices speaking up. Fariza emphasizes adaptability, leadership, and accountability. Jenny invites participation and listens. Ibrahim values openness to different backgrounds.'}
+ {title:'What we can bring into the workplace',text:'Ricardo brings observation, feedback, and persistence. Christina practices speaking up. Fariza emphasizes adaptability, leadership, and accountability. Jenny invites participation and listens. Ibrahim values openness to different backgrounds. Yense reminds us to include quieter people and respect their need to focus.'}
 ];
 export function step(state,action){
  const s={...state},m=members.find(m=>m.id===s.memberId);

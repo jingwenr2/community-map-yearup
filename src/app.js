@@ -12,19 +12,20 @@ const instant=()=>reduced.matches||$('instant').checked;
 const member=()=>members.find(m=>m.id===state.memberId);
 const avatar=(m,extra='')=>`<span class="avatar ${extra}" style="--accent:${m.color};--photo-position:${m.photoPosition||'50% 50%'};--photo-scale:${m.photoScale||1};--photo-origin:${m.photoOrigin||'50% 50%'}"><img src="${esc(m.photo)}" alt="${esc(m.name)}" draggable="false"></span>`;
 
-const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h2 class="student-name">${m.name}</h2><p class="student-subtitle">${m.subtitle}</p></div></div>`;
+const flag=p=>`<span class="country-flag" role="img" aria-label="${p.country}">${p.flag}</span>`;
+const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h2 class="student-name">${m.name}</h2><p class="student-subtitle">${m.subtitle}</p><p class="profile-country">${flag(places[m.locations[0].place])} ${places[m.locations[0].place].country} · ${m.locations[0].types.map(t=>connectionTypes[t].label).join(' / ')}</p></div></div>`;
 
 function render(){
  const m=member(),opening=state.scene==='opening';$('exhibit').dataset.scene=state.scene;
  $('navigation').hidden=opening;$('presentation-controls').hidden=opening;$('motion-control').hidden=false;$('member-selector').hidden=false;
- $('member-selector').innerHTML=members.map(m=>`<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}">${avatar(m)}<span>${m.shortName}</span></button>`).join('');
+ $('member-selector').innerHTML=members.map(m=>`<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}">${avatar(m)}<span class="nav-country" title="${places[m.locations[0].place].country} · ${m.locations[0].types.map(t=>connectionTypes[t].label).join(' / ')}">${flag(places[m.locations[0].place])}</span><span>${m.shortName}</span></button>`).join('');
  let html='',progress='',next='Next →';
  $('map-information').hidden=opening; $('map-information').removeAttribute('open');
- if(opening)html=`<p class="eyebrow opening-label"><span aria-hidden="true"></span>Year Up · Our community map</p><h1><span>Different roots.</span><span>One shared future.</span></h1><p class="opening-copy">From stand-up comedy to student clubs, our communities shape how we listen, learn and make space for each other.</p><div class="opening-actions"><button class="primary" data-action="next">Explore our stories <span aria-hidden="true">↗</span></button><button class="secondary" data-action="connections">See our connections <span aria-hidden="true">→</span></button></div><p class="opening-note">Five students, sharing the communities that shaped us.</p>`;
+ if(opening)html=`<p class="eyebrow opening-label"><span aria-hidden="true"></span>Year Up · Our community map</p><h1><span>Different roots.</span><span>One shared future.</span></h1><p class="opening-copy">From stand-up comedy to student clubs, our communities shape how we listen, learn and make space for each other.</p><div class="opening-actions"><button class="primary" data-action="next">Explore our stories <span aria-hidden="true">↗</span></button><button class="secondary" data-action="connections">See our connections <span aria-hidden="true">→</span></button></div><p class="opening-note">Six students, sharing the communities that shaped us.</p>`;
  if(state.scene==='choose'){html='<p class="eyebrow">Our people</p><h2>Get to know us.</h2><p>Choose a student to explore their places and story.</p>';progress='Choose a student';}
  if(state.scene==='places'){
   const l=m.locations[state.place],p=places[l.place];
-  html=`${identity(m)}<p class="connection-type">${l.types.map(t=>connectionTypes[t].label).join(' · ')}</p><h3 class="scene-title">${p.name}</h3><p class="place-story">${l.detail.replace(' No city was specified.','')}</p>`;
+  html=`${identity(m)}<p class="connection-type">${l.types.map(t=>connectionTypes[t].label).join(' · ')}</p><h3 class="scene-title">${flag(p)} ${p.name}</h3><p class="place-story">${l.detail.replace(' No city was specified.','')}</p>`;
   progress=`Place ${state.place+1} of ${m.locations.length}`;next=state.place<m.locations.length-1?'Next place →':`Meet ${m.shortName} →`;
  }
  if(state.scene==='story'){
@@ -41,7 +42,7 @@ function render(){
 function target(){
  const mobile=canvas.clientWidth<700,personal=['places','story'].includes(state.scene);
  let p=personal?places[member().locations[state.place].place]:{lat:24,lon:-35};
- if(state.scene==='places'){const midpoint=distanceToNewYork(p).points[50];p={lat:midpoint[1],lon:midpoint[0]};}
+ if(state.scene==='places'){const points=distanceToNewYork(p).points,midpoint=points[Math.floor((points.length-1)/2)];p={lat:midpoint[1],lon:midpoint[0]};}
  return {lat:p.lat,lon:p.lon,scale:state.scene==='choose'?.85:state.scene==='connections'?.78:.85,cx:mobile?.5:state.scene==='choose'?.56:.76,cy:mobile?(personal?.22:state.scene==='opening'?.26:.39):.43};
 }
 async function go(action,id,placeIndex=0,fromMap=false){
@@ -158,7 +159,7 @@ function renderPhotoMarkers(entries){
   e.x=Math.max(size/2+8,Math.min(width-size/2-8,e.x));e.y=Math.max(size/2+12,Math.min(height-180,e.y));
   const key=e.m.id+'-'+e.l.place;active.add(key);
   let button=$('markers').querySelector(`[data-marker-key="${key}"]`);
-  if(!button){button=document.createElement('button');button.className='photo-marker';button.dataset.markerKey=key;button.dataset.member=e.m.id;button.dataset.placeIndex=e.m.locations.indexOf(e.l);button.innerHTML=avatar(e.m)+`<span class="map-name">${esc(e.m.shortName)}</span>`;$('markers').append(button);}
+  if(!button){button=document.createElement('button');button.className='photo-marker';button.dataset.markerKey=key;button.dataset.member=e.m.id;button.dataset.placeIndex=e.m.locations.indexOf(e.l);button.innerHTML=avatar(e.m)+`<span class="map-name">${flag(places[e.l.place])} ${esc(e.m.shortName)}</span>`;$('markers').append(button);}
   button.style.left=e.x+'px';button.style.top=e.y+'px';button.style.setProperty('--accent',e.m.color);
   button.dataset.anchorX=e.q.x;button.dataset.anchorY=e.q.y;
   button.title=`${e.m.name} · ${places[e.l.place].name}`;

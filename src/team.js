@@ -7,17 +7,18 @@ export const connectionTypes = {
   education:{label:'Education',icon:'▣'}, culture:{label:'Cultural connection',icon:'◎'}
 };
 export const places = {
-  queens:{region:'new-york',name:'Queens, New York',lat:40.7282,lon:-73.7949},
-  colombia:{name:'Colombia',lat:4.57,lon:-74.30,countryLevel:true},
-  bronx:{region:'new-york',name:'Bronx, New York',lat:40.8448,lon:-73.8648},
-  mexico:{name:'Mexico',lat:23.63,lon:-102.55,countryLevel:true},
-  aktobe:{name:'Aktobe, Kazakhstan',lat:50.2839,lon:57.167},
-  china:{name:'China',lat:35.86,lon:104.20,countryLevel:true},
-  fuzhou:{name:'Fuzhou, Fujian, China',lat:26.0745,lon:119.2965},
-  eighth:{region:'new-york',name:'Eighth Avenue, Brooklyn, New York',lat:40.6395,lon:-74.0034},
-  chengdu:{name:'Chengdu, Sichuan, China',lat:30.5728,lon:104.0668},
-  nigeria:{name:'Nigeria',lat:9.082,lon:8.6753,countryLevel:true},
-  bedstuy:{region:'new-york',name:'Bedford-Stuyvesant, Brooklyn, New York',lat:40.6872,lon:-73.9418}
+  newyork:{country:'United States',flag:'🇺🇸',region:'new-york',name:'New York',lat:40.7128,lon:-74.0060},
+  queens:{country:'United States',flag:'🇺🇸',region:'new-york',name:'Queens, New York',lat:40.7282,lon:-73.7949},
+  colombia:{country:'Colombia',flag:'🇨🇴',name:'Colombia',lat:4.57,lon:-74.30,countryLevel:true},
+  bronx:{country:'United States',flag:'🇺🇸',region:'new-york',name:'Bronx, New York',lat:40.8448,lon:-73.8648},
+  mexico:{country:'Mexico',flag:'🇲🇽',name:'Mexico',lat:23.63,lon:-102.55,countryLevel:true},
+  aktobe:{country:'Kazakhstan',flag:'🇰🇿',name:'Aktobe, Kazakhstan',lat:50.2839,lon:57.167},
+  china:{country:'China',flag:'🇨🇳',name:'China',lat:35.86,lon:104.20,countryLevel:true},
+  fuzhou:{country:'China',flag:'🇨🇳',name:'Fuzhou, Fujian, China',lat:26.0745,lon:119.2965},
+  eighth:{country:'United States',flag:'🇺🇸',region:'new-york',name:'Eighth Avenue, Brooklyn, New York',lat:40.6395,lon:-74.0034},
+  chengdu:{country:'China',flag:'🇨🇳',name:'Chengdu, Sichuan, China',lat:30.5728,lon:104.0668},
+  nigeria:{country:'Nigeria',flag:'🇳🇬',name:'Nigeria',lat:9.082,lon:8.6753,countryLevel:true},
+  bedstuy:{country:'United States',flag:'🇺🇸',region:'new-york',name:'Bedford-Stuyvesant, Brooklyn, New York',lat:40.6872,lon:-73.9418}
 };
 export const members = [
   {id:'ricardo',name:'Ricardo Aristizabal',shortName:'Ricardo',initials:'RA',color:'#f0b16a',symbol:'✒',photo:'./public/photos/ricardo.jpeg',photoPosition:'50% 30%',photoScale:1,photoOrigin:'50% 50%',
@@ -49,11 +50,19 @@ export const members = [
    story:'Ibrahim connects with Nigeria through his cultural background and with Bedford-Stuyvesant, Brooklyn through community and identity. He values shared experiences and openness to different backgrounds. His story also includes learning to navigate corporate environments.',
    communities:['African community','Brooklyn','Baruch College','Year Up United'],interests:['Biking','Swimming','Basketball'],languages:['Hausa · speaks it and wants to become more fluent'],colors:['Blue','Green accents'],
    belonging:'Shared experiences and openness to different backgrounds help build connection.',
-   locations:[{place:'nigeria',types:['culture'],detail:'Cultural background.'},{place:'bedstuy',types:['culture'],detail:'Community connection and identity.'}]}
+   locations:[{place:'nigeria',types:['culture'],detail:'Cultural background.'},{place:'bedstuy',types:['culture'],detail:'Community connection and identity.'}]},
+  {id:'yense',name:'Yense Saavedra',shortName:'Yense',initials:'YS',color:'#a5c9ef',symbol:'●',photo:'./public/photos/yense.jpeg',photoPosition:'50% 35%',photoScale:1.15,photoOrigin:'50% 20%',
+   headline:'Feeling welcomed and included.',subtitle:'Exploring · movies · time to herself',
+   communityStory:'Yense feels most connected to Mexico, where being around people who love her makes her feel welcomed.',
+   story:'Yense was born in New York and raised in Queens. She loves exploring New York and other places, enjoys watching movies and shows, and values her own company.',
+   communities:['Mexico'],interests:['Exploring New York and other places','Movies and shows','Time to herself'],languages:['English','Spanish'],colors:['Pastel colors','Blue'],
+   belonging:'Being spoken to regularly and included helps Yense feel welcome. She does not talk a lot because she likes to stay focused and avoid distractions, rather than because she is shy.',
+   locations:[{place:'mexico',types:['culture'],detail:'Her strongest community connection: being around people who love her and make her feel welcomed.'},{place:'newyork',types:['birthplace'],detail:'Born in New York.'},{place:'queens',types:['upbringing'],detail:'Raised in Queens.'}]}
+
 ];
 export const insights = [
- {number:'01',title:'New York, a shared thread',text:'New York connections appear across Ricardo, Christina, Jenny, and Ibrahim, with distinct stories in Queens, the Bronx, and Brooklyn.'},
+ {number:'01',title:'New York, a shared thread',text:'New York connections appear across Ricardo, Christina, Jenny, Ibrahim, and Yense, with distinct stories in Queens, the Bronx, and Brooklyn.'},
  {number:'02',title:'Opportunity through Year Up',text:'Ricardo, Christina, and Ibrahim explicitly mention Year Up United. Ricardo and Ibrahim also describe learning to navigate corporate environments.'},
  {number:'03',title:'Many ways to find your people',text:'Comedy, movies, baking, entrepreneurship, student leadership, and sports offer different ways to connect beyond geography or nationality.'},
- {number:'04',title:'Belonging is something we practice',text:'The responses emphasize listening, respect, openness, making space for personality, and inviting participation.'}
+ {number:'04',title:'Belonging is something we practice',text:'The responses emphasize listening, respect, openness, making space for personality, inviting participation, and including quieter people.'}
 ];
