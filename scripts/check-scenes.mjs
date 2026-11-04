@@ -7,7 +7,7 @@ assert.deepEqual(step(initialState,'back'),initialState);
 let state={...initialState};
 for(const m of members){
  assert.equal(state.scene,'person');assert.equal(state.memberId,m.id);
- assert(profileStories[m.id]?.length>40);
+ assert(profileStories[m.id]?.length>40);assert(/\bI\b/.test(profileStories[m.id]));assert.equal(profileStories[m.id].match(/[.!?](?:\s|$)/g)?.length,3);
  const next=step(state,'next');assert.deepEqual(step(next,'back'),state);
  assert.deepEqual(step(next,'home'),initialState);
  assert.deepEqual(step(initialState,{type:'select',memberId:m.id}),state);
@@ -19,7 +19,7 @@ assert.deepEqual(step(initialState,'connections'),state);
 assert.equal(sharedInsights.length,4);
 assert(sharedInsights.every(i=>i.title&&i.text));
 assert.deepEqual(step(initialState,{type:'select',memberId:'unknown'}),initialState);
-for(const text of ['president of both the Math Club and Chinese Culture Club','five or six','fun, educational','become friends','making space for others','participate','listening'])assert(profileStories.jenny.includes(text));
+for(const text of ['president of both the Math Club and Chinese Culture Club','five or six','fun, educational','become friends','making space for others','take part','listening'])assert(profileStories.jenny.includes(text));
 assert.equal(distanceToNewYork(newYorkReference).km,0);
 for(const m of members)for(const l of m.locations){const d=distanceToNewYork(places[l.place]);assert(Number.isFinite(d.km));assert(d.points.length>=2);}
 console.log('Scene checks passed: six complete profiles in order, Next/Back, direct selection, one final summary, Jenny’s supplied leadership story, and geographic references.');

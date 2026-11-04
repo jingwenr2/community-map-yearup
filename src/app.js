@@ -1,37 +1,36 @@
 import {members,places,connectionTypes} from './team.js';
 import {routes} from './connections.js';
-import {initialState,step,sharedInsights,profileStories} from './scenes.js';
+import {mapLabels} from './map-labels.js';
+import {initialState,step,sharedInsights,profileStories,primaryCommunities} from './scenes.js';
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let state={...initialState},busy=false,lat=places[members[0].locations[0].place].lat,lon=places[members[0].locations[0].place].lon,scale=.85,cx=.76,cy=.43,width=0,height=0,radius=0;
+let state={...initialState},busy=false,lat=places[members[0].locations[0].place].lat,lon=places[members[0].locations[0].place].lon,scale=.94,cx=.69,cy=.45,width=0,height=0,radius=0;
 let camera=null,texture=null,world=[],drawn=false,paintTime=0;
 let surfaceLat=null,surfaceLon=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),canvas=$('globe'),ctx=canvas.getContext('2d'),rad=Math.PI/180;
 const surface=document.createElement('canvas');surface.width=surface.height=440;const surfaceCtx=surface.getContext('2d');
-const sphere=surfaceCtx.createImageData(440,440),stars=Array.from({length:24},(_,i)=>({x:((i*7919)%1009)/1009,y:((i*3571)%997)/997,r:i%7===0?1:.55}));
+const sphere=surfaceCtx.createImageData(440,440);
 const instant=()=>reduced.matches||$('instant').checked;
 const member=()=>members.find(m=>m.id===state.memberId);
 const avatar=(m,extra='')=>`<span class="avatar ${extra}" style="--accent:${m.color};--photo-position:${m.photoPosition||'50% 50%'};--photo-scale:${m.photoScale||1};--photo-origin:${m.photoOrigin||'50% 50%'}"><img src="${esc(m.photo)}" alt="${esc(m.name)}" draggable="false"></span>`;
-const flag=p=>`<span class="country-flag" role="img" aria-label="${p.country}">${p.flag}</span>`;
-const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h1 class="student-name">${m.name}</h1><p class="student-subtitle">${m.subtitle}</p></div></div>`;
+const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h1 class="student-name">${m.name}</h1><p class="primary-community">${primaryCommunities[m.id]}</p></div></div>`;
 function render(){
  const m=member(),summary=state.scene==='summary';$('exhibit').dataset.scene=state.scene;
  for(const id of ['navigation','presentation-controls','motion-control','member-selector','map-information'])$(id).hidden=false;
  $('map-information').removeAttribute('open');
- $('member-selector').innerHTML=members.map(m=>`<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}">${avatar(m)}<span class="nav-country" title="${places[m.locations[0].place].country} · ${m.locations[0].types.map(t=>connectionTypes[t].label).join(' / ')}">${flag(places[m.locations[0].place])}</span><span>${m.shortName}</span></button>`).join('');
+ $('member-selector').innerHTML=members.map(m=>`<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}"><span>${m.shortName}</span></button>`).join('');
  let html='';
  if(m){
-  const facts=[m.languages?.length?`<span><b>Languages:</b> ${esc(m.languages.join(' · '))}</span>`:'',m.interests.length?`<span><b>Interests:</b> ${esc(m.interests.join(' · '))}</span>`:'',m.colors?.length?`<span><b>Colors:</b> ${esc(m.colors.join(' · '))}</span>`:''].filter(Boolean).join('');
-  html=`${identity(m)}<p class="personal-story">${profileStories[m.id]}</p><section class="profile-communities"><h2>My communities</h2><p>${m.communities.join(' · ')}</p></section><section class="profile-places"><h2>My places</h2><ul>${m.locations.map(l=>{const p=places[l.place];return `<li title="${esc(l.detail)}">${flag(p)} <span>${p.name}</span><small>${l.types.map(t=>connectionTypes[t].label).join(' · ')}</small></li>`;}).join('')}</ul></section><div class="personal-facts">${facts}</div>`;
- }else html=`<p class="eyebrow">Our shared connections</p><h1 class="scene-title">What we take forward</h1><div class="shared-summary">${sharedInsights.map((i,index)=>`<section><h2><span>${index+1}.</span> ${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
+  html=`${identity(m)}<p class="personal-story">${profileStories[m.id]}</p>`;
+ }else html=`<h1 class="scene-title">What we take forward</h1><div class="shared-summary">${sharedInsights.map(i=>`<section><h2>${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
  $('content').innerHTML=html;$('content').scrollTop=0;
- $('progress').textContent=summary?'Shared summary':`${members.findIndex(n=>n.id===m.id)+1} of ${members.length} · ${m.shortName}`;
+ $('progress').textContent=summary?'Together':`${members.findIndex(n=>n.id===m.id)+1} of ${members.length}`;
  $('next').textContent=summary?'Next →':members.at(-1).id===m.id?'Shared summary →':'Next →';
  $('next').disabled=summary;$('back').disabled=!summary&&m.id===members[0].id;
  drawn=false;
 }
 function target(){
  const mobile=canvas.clientWidth<700,m=member(),p=m?places[m.locations[0].place]:{lat:24,lon:-35};
- return {lat:p.lat,lon:p.lon,scale:m?.85:.78,cx:mobile?.5:.76,cy:mobile?.20:.43};
+ return {lat:p.lat,lon:p.lon,scale:.94,cx:mobile?.5:canvas.clientWidth<1100?.73:.70,cy:mobile?.5:.45};
 }
 async function go(action,id){
  if(busy)return;
@@ -43,7 +42,7 @@ async function go(action,id){
  if(moves&&!instant())await new Promise(resolve=>{camera={start:performance.now(),duration:500,from:{lat,lon,scale,cx,cy},to:t,resolve};});
  else{lat=t.lat;lon=t.lon;scale=t.scale;cx=t.cx;cy=t.cy;}
  render();draw();drawn=true;$('content').classList.remove('departing');busy=false;$('exhibit').removeAttribute('aria-busy');
- (state.scene==='summary'?$ ('back'):$('next')).focus({preventScroll:true});$('content').scrollTop=0;
+ (state.scene==='summary'?$ ('back'):$('next')).focus({preventScroll:true});$('content').scrollTop=0;if(canvas.clientWidth<700)window.scrollTo(0,0);
 }
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.member)go(null,b.dataset.member);else if(b.dataset.action)go(b.dataset.action);});
 document.addEventListener('keydown',e=>{if(e.target.matches('input')||e.altKey||e.metaKey||e.ctrlKey)return;if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();go(e.key==='ArrowRight'?'next':'back');}if(e.key==='Escape'&&$('map-information').open)$('map-information').removeAttribute('open');});
@@ -60,76 +59,78 @@ function earth(){
   const u=(x-r)/r,v=(r-y)/r,z2=1-u*u-v*v,i=(y*size+x)*4;
   if(z2<0){data[i+3]=0;continue;}const z=Math.sqrt(z2),latitude=Math.asin(v*cos+z*sin),longitude=Math.atan2(u,z*cos-v*sin)+lon*rad;
   const tx=((Math.floor((longitude/(2*Math.PI)+.5)*texture.width)%texture.width)+texture.width)%texture.width,ty=Math.min(texture.height-1,Math.max(0,Math.floor((.5-latitude/Math.PI)*texture.height))),j=(ty*texture.width+tx)*4;
-  const light=.24+.76*Math.max(0,-u*.4+v*.3+z*.85),edge=Math.pow(1-z,3)*35;
-  data[i]=texture.data[j]*light+edge*.15;data[i+1]=texture.data[j+1]*light+edge*.48;data[i+2]=texture.data[j+2]*light+edge;data[i+3]=255;
+  const red=texture.data[j],green=texture.data[j+1],blue=texture.data[j+2],ocean=blue>red*1.12&&blue>green*1.02;
+  const detail=(red+green+blue)/765,light=.91+.09*Math.max(0,-u*.25+v*.2+z*.9);
+  const base=ocean?[139+detail*28,183+detail*25,194+detail*24]:[182+detail*30,194+detail*26,173+detail*34];
+  data[i]=base[0]*light;data[i+1]=base[1]*light;data[i+2]=base[2]*light;data[i+3]=255;
  }
  surfaceCtx.putImageData(sphere,0,0);ctx.drawImage(surface,width*cx-radius,height*cy-radius,radius*2,radius*2);
 }
 function networkDetails(){
  // Every illuminated point and every connection comes from a supplied place.
- for(let la=-60;la<=60;la+=30)line(Array.from({length:181},(_,i)=>[-180+i*2,la]),'#65d9f20c');
- for(let lo=-180;lo<180;lo+=30)line(Array.from({length:91},(_,i)=>[lo,-90+i*2]),'#65d9f20c');
+ for(let la=-60;la<=60;la+=30)line(Array.from({length:181},(_,i)=>[-180+i*2,la]),'#476e7114');
+ for(let lo=-180;lo<180;lo+=30)line(Array.from({length:91},(_,i)=>[lo,-90+i*2]),'#476e7114');
 
 }
 function draw(){
- ctx.clearRect(0,0,width,height);for(const s of stars){ctx.fillStyle='#b8d3f0';ctx.globalAlpha=s.r===1?.18:.1;ctx.beginPath();ctx.arc(s.x*width,s.y*height,s.r,0,7);ctx.fill();}ctx.globalAlpha=1;
- radius=Math.min(width*(width<700?.48:.35),height*.36)*scale;
+ ctx.clearRect(0,0,width,height);
+ radius=Math.min(width*(width<700?.44:width<1100?.28:.31),height*(width<700?.46:.42))*scale;
  const x=width*cx,y=height*cy;
-
- const halo=ctx.createRadialGradient(x,y,radius*.98,x,y,radius*1.09);halo.addColorStop(0,'#4aa8f020');halo.addColorStop(.25,'#4aa8f008');halo.addColorStop(1,'#4aa8f000');ctx.fillStyle=halo;ctx.beginPath();ctx.arc(x,y,radius*1.09,0,7);ctx.fill();
  if(texture)earth();else{
-  ctx.fillStyle='#0c2841';ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.fill();
+  ctx.fillStyle='#a2c7ce';ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.fill();
   for(const polygon of world)line(polygon[0],'#78a7ab60');
  }
  networkDetails();
- ctx.strokeStyle='#8cd1ff40';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.stroke();
+ ctx.strokeStyle='#738f8530';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.stroke();
  let visible=[];
  if(state.scene==='person'){
   const m=member();visible=m.locations.map(l=>({m,l}));
-  for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,m.color+'a0');
+  for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,'#527d7c99');
  }else{
   visible=members.map(m=>({m,l:m.locations.find(l=>places[l.place].region==='new-york')||m.locations[0]}));
-  for(const route of routes)line(route.points,route.member.color+'70');
+  for(const route of routes)line(route.points,'#527d7c50');
  }
- renderPhotoMarkers(visible);
+ renderPlaceMarkers(visible);
+ drawMapLabels();
 
 }
-function renderPhotoMarkers(entries){
- const size=width<700?56:64,gap=size+18;
- const projected=entries.map(e=>({...e,q:project(places[e.l.place].lat,places[e.l.place].lon)})).filter(e=>e.q.z>.07);
+function drawMapLabels(){
+ const small=width<700,occupied=[...$('markers').children].map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top),w:90,h:42})),placed=[];
+ ctx.save();ctx.beginPath();ctx.arc(width*cx,height*cy,radius*.98,0,Math.PI*2);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
+ for(const label of mapLabels){
+  for(const q of label.anchors.map(([a,b])=>project(a,b)).sort((a,b)=>b.z-a.z)){
+  if(q.z<.22)continue;
+  const ocean=label.kind==='ocean',fontSize=small?(ocean?9:10):(ocean?11:12);
+  ctx.font=`${ocean?'italic 400':'500'} ${fontSize}px Inter, sans-serif`;
+  const w=ctx.measureText(label.name).width+10,h=fontSize+8;
+  if([-1,1].some(dx=>[-1,1].some(dy=>Math.hypot(q.x+dx*w/2-width*cx,q.y+dy*h/2-height*cy)>radius*.98)))continue;
+  if(occupied.some(r=>Math.abs(q.x-r.x)<(w+r.w)/2&&Math.abs(q.y-r.y)<(h+r.h)/2)||placed.some(r=>Math.abs(q.x-r.x)<(w+r.w)/2&&Math.abs(q.y-r.y)<(h+r.h)/2))continue;
+  placed.push({x:q.x,y:q.y,w,h});
+  ctx.globalAlpha=Math.min(1,(q.z-.15)*2);ctx.strokeStyle='#b9d0cd80';ctx.lineWidth=3;ctx.lineJoin='round';ctx.strokeText(label.name,q.x,q.y);ctx.fillStyle=ocean?'#55777d':'#465e57';ctx.fillText(label.name,q.x,q.y);break;
+  }
+ }
+ ctx.restore();
+}
+function renderPlaceMarkers(entries){
+ const visible=entries.map(e=>({...e,q:project(places[e.l.place].lat,places[e.l.place].lon)})).filter(e=>e.q.z>.10);
+ const shortName={queens:'Queens',eighth:'Eighth Avenue',bedstuy:'Bed-Stuy',fuzhou:'Fuzhou',chengdu:'Chengdu',newyork:'New York'};
  const groups=[];
- for(const e of projected){
-  const nearby=groups.filter(g=>g.some(p=>Math.hypot(p.q.x-e.q.x,p.q.y-e.q.y)<gap));
-  if(!nearby.length)groups.push([e]);
-  else{const first=nearby[0];first.push(e);for(const other of nearby.slice(1)){first.push(...other);groups.splice(groups.indexOf(other),1);}}
- }
- const arranged=[];
- for(const group of groups){
-  const center={x:group.reduce((v,e)=>v+e.q.x,0)/group.length,y:group.reduce((v,e)=>v+e.q.y,0)/group.length};
-  group.forEach((e,i)=>{
-   const angle=-Math.PI/2+i*2*Math.PI/group.length,spread=group.length===1?0:Math.max(80,gap*group.length/(2*Math.PI));
-   arranged.push({...e,x:center.x+Math.cos(angle)*spread,y:center.y+Math.sin(angle)*spread});
-  });
- }
- // Separate neighboring groups too; leave every geographic endpoint untouched.
- for(let pass=0;pass<12;pass++)for(let i=0;i<arranged.length;i++)for(let j=i+1;j<arranged.length;j++){
-  const a=arranged[i],b=arranged[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
-  if(d<gap){const ux=d?dx/d:1,uy=d?dy/d:0,move=(gap-d)/2+.1;a.x-=ux*move;a.y-=uy*move;b.x+=ux*move;b.y+=uy*move;}
- }
+ for(const e of visible){const group=groups.find(g=>Math.hypot(g[0].q.x-e.q.x,g[0].q.y-e.q.y)<45);if(group)group.push(e);else groups.push([e]);}
  const active=new Set();let leaders='';
- for(const e of arranged){
-  e.x=Math.max(size/2+8,Math.min(width-size/2-8,e.x));e.y=Math.max(size/2+12,Math.min(height-180,e.y));
-  const key=e.m.id+'-'+e.l.place;active.add(key);
+ for(const group of groups)group.forEach((e,index)=>{
+  const key=e.m.id+'-'+e.l.place;active.add(key);const p=places[e.l.place];
+  const angle=(-135+index*270/Math.max(1,group.length-1))*rad;
+  let dx=group.length>1?Math.cos(angle)*52:0,dy=group.length>1?Math.sin(angle)*40:-22;
+  const labelHalf=Math.max(24,(shortName[e.l.place]||p.name).length*3);
+  dx=Math.max(labelHalf+8-e.q.x,Math.min(width-labelHalf-8-e.q.x,dx));dy=Math.max(14-e.q.y,Math.min(height-14-e.q.y,dy));
   let button=$('markers').querySelector(`[data-marker-key="${key}"]`);
-  if(!button){button=document.createElement('button');button.className='photo-marker';button.dataset.markerKey=key;button.dataset.member=e.m.id;button.dataset.placeIndex=e.m.locations.indexOf(e.l);button.innerHTML=avatar(e.m)+`<span class="map-name">${flag(places[e.l.place])} ${esc(e.m.shortName)}</span>`;$('markers').append(button);}
-  button.style.left=e.x+'px';button.style.top=e.y+'px';button.style.setProperty('--accent',e.m.color);
-  button.dataset.anchorX=e.q.x;button.dataset.anchorY=e.q.y;
-  button.title=`${e.m.name} · ${places[e.l.place].name}`;
-  button.setAttribute('aria-label',`Meet ${e.m.name} · ${places[e.l.place].name}`);
-  button.setAttribute('aria-pressed',String(state.memberId===e.m.id));
-  const dx=e.q.x-e.x,dy=e.q.y-e.y,d=Math.hypot(dx,dy)||1,sx=e.x+dx/d*size/2,sy=e.y+dy/d*size/2;
-  leaders+=`<line data-marker-key="${key}" x1="${sx}" y1="${sy}" x2="${e.q.x}" y2="${e.q.y}" stroke="${e.m.color}" /><circle cx="${e.q.x}" cy="${e.q.y}" r="2.5" fill="${e.m.color}" stroke="${e.m.color}"/>`;
- }
+  if(!button){button=document.createElement('button');button.className='place-marker';button.dataset.markerKey=key;button.dataset.member=e.m.id;button.innerHTML=`<span class="place-name">${shortName[e.l.place]||p.name}</span>`;$('markers').append(button);}
+  button.style.left=e.q.x+'px';button.style.top=e.q.y+'px';button.dataset.anchorX=e.q.x;button.dataset.anchorY=e.q.y;
+  const label=button.querySelector('.place-name');label.style.left=dx+'px';label.style.top=dy+'px';
+  button.title=`${e.m.shortName} · ${p.name} · ${e.l.types.map(t=>connectionTypes[t].label).join(' / ')}`;
+  button.setAttribute('aria-label',button.title);button.setAttribute('aria-pressed',String(state.memberId===e.m.id));
+  leaders+=`<line x1="${e.q.x}" y1="${e.q.y}" x2="${e.q.x+dx}" y2="${e.q.y+dy}" stroke="#557c76"/>`;
+ });
  for(const button of [...$('markers').children])if(!active.has(button.dataset.markerKey))button.remove();
  $('marker-leaders').innerHTML=leaders;
 }
