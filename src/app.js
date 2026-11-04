@@ -1,9 +1,9 @@
 import {members,places,connectionTypes} from './team.js';
-import {routes,distanceToNewYork,newYorkReference} from './connections.js';
-import {initialState,step,chapters,sharedInsights} from './scenes.js';
+import {routes} from './connections.js';
+import {initialState,step,sharedInsights,profileStories} from './scenes.js';
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let state={...initialState},busy=false,lat=24,lon=-35,scale=.78,cx=.75,cy=.43,width=0,height=0,radius=0,last=0,interacted=false;
-let camera=null,texture=null,world=[],drawn=false,distanceProgress=1,visualTime=0,paintTime=0,drag=null;
+let state={...initialState},busy=false,lat=places[members[0].locations[0].place].lat,lon=places[members[0].locations[0].place].lon,scale=.85,cx=.76,cy=.43,width=0,height=0,radius=0;
+let camera=null,texture=null,world=[],drawn=false,paintTime=0;
 let surfaceLat=null,surfaceLon=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),canvas=$('globe'),ctx=canvas.getContext('2d'),rad=Math.PI/180;
 const surface=document.createElement('canvas');surface.width=surface.height=440;const surfaceCtx=surface.getContext('2d');
@@ -11,68 +11,45 @@ const sphere=surfaceCtx.createImageData(440,440),stars=Array.from({length:24},(_
 const instant=()=>reduced.matches||$('instant').checked;
 const member=()=>members.find(m=>m.id===state.memberId);
 const avatar=(m,extra='')=>`<span class="avatar ${extra}" style="--accent:${m.color};--photo-position:${m.photoPosition||'50% 50%'};--photo-scale:${m.photoScale||1};--photo-origin:${m.photoOrigin||'50% 50%'}"><img src="${esc(m.photo)}" alt="${esc(m.name)}" draggable="false"></span>`;
-
 const flag=p=>`<span class="country-flag" role="img" aria-label="${p.country}">${p.flag}</span>`;
-const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h2 class="student-name">${m.name}</h2><p class="student-subtitle">${m.subtitle}</p><p class="profile-country">${flag(places[m.locations[0].place])} ${places[m.locations[0].place].country} · ${m.locations[0].types.map(t=>connectionTypes[t].label).join(' / ')}</p></div></div>`;
-
+const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h1 class="student-name">${m.name}</h1><p class="student-subtitle">${m.subtitle}</p></div></div>`;
 function render(){
- const m=member(),opening=state.scene==='opening';$('exhibit').dataset.scene=state.scene;
- $('navigation').hidden=opening;$('presentation-controls').hidden=opening;$('motion-control').hidden=false;$('member-selector').hidden=false;
+ const m=member(),summary=state.scene==='summary';$('exhibit').dataset.scene=state.scene;
+ for(const id of ['navigation','presentation-controls','motion-control','member-selector','map-information'])$(id).hidden=false;
+ $('map-information').removeAttribute('open');
  $('member-selector').innerHTML=members.map(m=>`<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}">${avatar(m)}<span class="nav-country" title="${places[m.locations[0].place].country} · ${m.locations[0].types.map(t=>connectionTypes[t].label).join(' / ')}">${flag(places[m.locations[0].place])}</span><span>${m.shortName}</span></button>`).join('');
- let html='',progress='',next='Next →';
- $('map-information').hidden=opening; $('map-information').removeAttribute('open');
- if(opening)html=`<p class="eyebrow opening-label"><span aria-hidden="true"></span>Year Up · Our community map</p><h1><span>Different roots.</span><span>One shared future.</span></h1><p class="opening-copy">From stand-up comedy to student clubs, our communities shape how we listen, learn and make space for each other.</p><div class="opening-actions"><button class="primary" data-action="next">Explore our stories <span aria-hidden="true">↗</span></button><button class="secondary" data-action="connections">See our connections <span aria-hidden="true">→</span></button></div><p class="opening-note">Six students, sharing the communities that shaped us.</p>`;
- if(state.scene==='choose'){html='<p class="eyebrow">Our people</p><h2>Get to know us.</h2><p>Choose a student to explore their places and story.</p>';progress='Choose a student';}
- if(state.scene==='places'){
-  const l=m.locations[state.place],p=places[l.place];
-  html=`${identity(m)}<p class="connection-type">${l.types.map(t=>connectionTypes[t].label).join(' · ')}</p><h3 class="scene-title">${flag(p)} ${p.name}</h3><p class="place-story">${l.detail.replace(' No city was specified.','')}</p>`;
-  progress=`Place ${state.place+1} of ${m.locations.length}`;next=state.place<m.locations.length-1?'Next place →':`Meet ${m.shortName} →`;
- }
- if(state.scene==='story'){
-  const all=chapters(m),c=all[state.chapter];
-  const details=state.chapter===0?[m.interests.length?`Interests: ${m.interests.join(' · ')}`:'',m.languages?`Languages: ${m.languages.join(' · ')}`:'',m.colors?`Favorite colors: ${m.colors.join(' · ')}`:''].filter(Boolean).join('<br>'):'';
-  html=`${identity(m)}<h3 class="scene-title">${c.title}</h3><p class="chapter-copy">${c.text}</p>${details?`<details class="personal-details"><summary>A little more about ${m.shortName}</summary><p>${details}</p></details>`:''}`;
-  progress=`Chapter ${state.chapter+1} of ${all.length}`;next=state.chapter<all.length-1?'Next chapter →':'Choose another →';
- }
- if(state.scene==='connections'){
-  const i=sharedInsights[state.insight];html=`<p class="eyebrow">Our shared connections · ${state.insight+1} / 4</p><h2 class="scene-title">${i.title}</h2><p>${i.text}</p>`;progress=`Connection ${state.insight+1} of 4`;next=state.insight<3?'Next insight →':'Meet our people →';
- }
- $('content').innerHTML=html;$('content').scrollTop=0;$('progress').textContent=progress;$('next').textContent=next;$('next').disabled=state.scene==='choose';$('back').disabled=state.scene==='connections'&&state.insight===0;drawn=false;
-}
-function target(){
- const mobile=canvas.clientWidth<700,personal=['places','story'].includes(state.scene);
- let p=personal?places[member().locations[state.place].place]:{lat:24,lon:-35};
- if(state.scene==='places'){const points=distanceToNewYork(p).points,midpoint=points[Math.floor((points.length-1)/2)];p={lat:midpoint[1],lon:midpoint[0]};}
- return {lat:p.lat,lon:p.lon,scale:state.scene==='choose'?.85:state.scene==='connections'?.78:.85,cx:mobile?.5:state.scene==='choose'?.56:.76,cy:mobile?(personal?.22:state.scene==='opening'?.26:.39):.43};
-}
-async function go(action,id,placeIndex=0,fromMap=false){
- if(busy)return;const next=id?{...state,scene:fromMap?'story':'places',memberId:id,place:placeIndex,chapter:0}:step(state,action);
- if(JSON.stringify(next)===JSON.stringify(state))return;
- interacted=true;busy=true;$('exhibit').setAttribute('aria-busy','true');$('content').classList.add('departing');
- if(!instant())await new Promise(r=>setTimeout(r,220));
- state=next;distanceProgress=instant()?1:0;const t=target(),duration=instant()?0:1250;
- const oldLon=lon;t.lon=oldLon+((t.lon-oldLon+540)%360-180);
- await new Promise(resolve=>{camera={start:performance.now(),duration,from:{lat,lon,scale,cx,cy},to:t,resolve};});
- render();draw();updateDistance();drawn=true;$('content').classList.remove('departing');busy=false;$('exhibit').removeAttribute('aria-busy');
- const focus=state.scene==='choose'?$ ('member-selector').querySelector('button'):$('next');focus?.focus({preventScroll:true});$('content').scrollTop=0;requestAnimationFrame(()=>{$('content').scrollTop=0;});
-}
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.member)go(null,b.dataset.member,Number(b.dataset.placeIndex||0),b.classList.contains('photo-marker'));else if(b.dataset.action)go(b.dataset.action);});
-document.addEventListener('keydown',e=>{if(e.target.matches('input')||e.altKey||e.metaKey||e.ctrlKey)return;if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();go(e.key==='ArrowRight'?'next':'back');}if(e.key==='Escape'){if($('map-information').open)$('map-information').removeAttribute('open');else go('choose');}});
-$('instant').checked=reduced.matches;
-function syncMotion(){
- $('exhibit').classList.toggle('instant',instant());
- if(camera&&instant())camera.duration=0;
+ let html='';
+ if(m){
+  const facts=[m.languages?.length?`<span><b>Languages:</b> ${esc(m.languages.join(' · '))}</span>`:'',m.interests.length?`<span><b>Interests:</b> ${esc(m.interests.join(' · '))}</span>`:'',m.colors?.length?`<span><b>Colors:</b> ${esc(m.colors.join(' · '))}</span>`:''].filter(Boolean).join('');
+  html=`${identity(m)}<p class="personal-story">${profileStories[m.id]}</p><section class="profile-communities"><h2>My communities</h2><p>${m.communities.join(' · ')}</p></section><section class="profile-places"><h2>My places</h2><ul>${m.locations.map(l=>{const p=places[l.place];return `<li title="${esc(l.detail)}">${flag(p)} <span>${p.name}</span><small>${l.types.map(t=>connectionTypes[t].label).join(' · ')}</small></li>`;}).join('')}</ul></section><div class="personal-facts">${facts}</div>`;
+ }else html=`<p class="eyebrow">Our shared connections</p><h1 class="scene-title">What we take forward</h1><div class="shared-summary">${sharedInsights.map((i,index)=>`<section><h2><span>${index+1}.</span> ${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
+ $('content').innerHTML=html;$('content').scrollTop=0;
+ $('progress').textContent=summary?'Shared summary':`${members.findIndex(n=>n.id===m.id)+1} of ${members.length} · ${m.shortName}`;
+ $('next').textContent=summary?'Next →':members.at(-1).id===m.id?'Shared summary →':'Next →';
+ $('next').disabled=summary;$('back').disabled=!summary&&m.id===members[0].id;
  drawn=false;
 }
-$('instant').onchange=syncMotion;
-reduced.addEventListener('change',syncMotion);
-syncMotion();
-canvas.addEventListener('pointerdown',e=>{
- interacted=true;if(busy||!['opening','choose'].includes(state.scene))return;
- drag={x:e.clientX,y:e.clientY,lat,lon};canvas.setPointerCapture(e.pointerId);
-});
-canvas.addEventListener('pointermove',e=>{if(!drag)return;lon=drag.lon-(e.clientX-drag.x)*.25;lat=Math.max(-75,Math.min(75,drag.lat+(e.clientY-drag.y)*.2));drawn=false;});
-canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);
+function target(){
+ const mobile=canvas.clientWidth<700,m=member(),p=m?places[m.locations[0].place]:{lat:24,lon:-35};
+ return {lat:p.lat,lon:p.lon,scale:m?.85:.78,cx:mobile?.5:.76,cy:mobile?.20:.43};
+}
+async function go(action,id){
+ if(busy)return;
+ const next=step(state,id?{type:'select',memberId:id}:action);
+ if(JSON.stringify(next)===JSON.stringify(state))return;
+ const moves=next.scene==='person'&&next.memberId!==state.memberId;
+ busy=true;$('exhibit').setAttribute('aria-busy','true');$('content').classList.add('departing');
+ state=next;const t=target();t.lon=lon+((t.lon-lon+540)%360-180);
+ if(moves&&!instant())await new Promise(resolve=>{camera={start:performance.now(),duration:500,from:{lat,lon,scale,cx,cy},to:t,resolve};});
+ else{lat=t.lat;lon=t.lon;scale=t.scale;cx=t.cx;cy=t.cy;}
+ render();draw();drawn=true;$('content').classList.remove('departing');busy=false;$('exhibit').removeAttribute('aria-busy');
+ (state.scene==='summary'?$ ('back'):$('next')).focus({preventScroll:true});$('content').scrollTop=0;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.member)go(null,b.dataset.member);else if(b.dataset.action)go(b.dataset.action);});
+document.addEventListener('keydown',e=>{if(e.target.matches('input')||e.altKey||e.metaKey||e.ctrlKey)return;if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();go(e.key==='ArrowRight'?'next':'back');}if(e.key==='Escape'&&$('map-information').open)$('map-information').removeAttribute('open');});
+$('instant').checked=reduced.matches;
+function syncMotion(){if(camera&&instant())camera.duration=0;drawn=false;}
+$('instant').onchange=syncMotion;reduced.addEventListener('change',syncMotion);
 function project(latitude,longitude,lift=1){const a=latitude*rad,b=(longitude-lon)*rad,c=lat*rad;return {x:width*cx+radius*Math.cos(a)*Math.sin(b)*lift,y:height*cy-radius*(Math.cos(c)*Math.sin(a)-Math.sin(c)*Math.cos(a)*Math.cos(b))*lift,z:Math.sin(c)*Math.sin(a)+Math.cos(c)*Math.cos(a)*Math.cos(b)};}
 function line(points,color){ctx.beginPath();let pen=false;for(const [lo,la]of points){const p=project(la,lo,1.008);if(p.z>.01){if(pen)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);pen=true;}else pen=false;}ctx.strokeStyle=color;ctx.lineWidth=.9;ctx.stroke();}
 function earth(){
@@ -94,11 +71,6 @@ function networkDetails(){
  for(let lo=-180;lo<180;lo+=30)line(Array.from({length:91},(_,i)=>[lo,-90+i*2]),'#65d9f20c');
 
 }
-function openingNetwork(){
- const progress=instant()?1:Math.min(1,visualTime/2200);
- for(const route of routes)line(route.points.slice(0,Math.max(2,Math.ceil(progress*route.points.length))),route.member.color+'65');
-}
-
 function draw(){
  ctx.clearRect(0,0,width,height);for(const s of stars){ctx.fillStyle='#b8d3f0';ctx.globalAlpha=s.r===1?.18:.1;ctx.beginPath();ctx.arc(s.x*width,s.y*height,s.r,0,7);ctx.fill();}ctx.globalAlpha=1;
  radius=Math.min(width*(width<700?.48:.35),height*.36)*scale;
@@ -110,24 +82,14 @@ function draw(){
   for(const polygon of world)line(polygon[0],'#78a7ab60');
  }
  networkDetails();
- if(state.scene==='opening')openingNetwork();
  ctx.strokeStyle='#8cd1ff40';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.stroke();
  let visible=[];
- if(state.scene==='choose'||state.scene==='opening')visible=members.map(m=>({m,l:m.locations[0]}));
- if(state.scene==='places'||state.scene==='story'){
-  const m=member(),revealed=m.locations.slice(0,state.place+1);visible=[{m,l:m.locations[state.place]}];
-  if(state.scene==='story')for(const route of routes.filter(r=>r.member.id===m.id&&revealed.some(l=>l.place===r.fromId)&&revealed.some(l=>l.place===r.toId)))line(route.points,m.color+'aa');
-  if(state.scene==='places'){
-   const selected=m.locations[state.place],d=distanceToNewYork(places[selected.place]);
-   visible=[{m,l:selected}];
-   line(d.points.slice(0,Math.max(2,Math.ceil(distanceProgress*d.points.length))),m.color);
-   const ny=project(newYorkReference.lat,newYorkReference.lon);
-   if(ny.z>.03){ctx.fillStyle='#ff934a';ctx.beginPath();ctx.arc(ny.x,ny.y,4,0,Math.PI*2);ctx.fill();ctx.font='11px Inter, sans-serif';ctx.textAlign='center';ctx.fillText('New York City',ny.x,ny.y-14);}
-  }
- }
- if(state.scene==='connections'){
+ if(state.scene==='person'){
+  const m=member();visible=m.locations.map(l=>({m,l}));
+  for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,m.color+'a0');
+ }else{
   visible=members.map(m=>({m,l:m.locations.find(l=>places[l.place].region==='new-york')||m.locations[0]}));
-  for(const route of routes.filter(r=>r.newYork))line(route.points,route.member.color+'80');
+  for(const route of routes)line(route.points,route.member.color+'70');
  }
  renderPhotoMarkers(visible);
 
@@ -171,20 +133,15 @@ function renderPhotoMarkers(entries){
  for(const button of [...$('markers').children])if(!active.has(button.dataset.markerKey))button.remove();
  $('marker-leaders').innerHTML=leaders;
 }
-function updateDistance(){
- const caption=$('distance-caption');caption.hidden=state.scene!=='places';
- if(caption.hidden)return;
- const m=member(),p=places[m.locations[state.place].place],d=distanceToNewYork(p);
- 
- caption.innerHTML=`<span>${esc(p.name)} ↔ New York City</span><strong>≈ ${Math.round(d.km*distanceProgress).toLocaleString('en-US')} <small>km</small></strong>`;
-}
 function tick(now){
- if(now-paintTime<32){requestAnimationFrame(tick);return;}paintTime=now;visualTime=now;
+ if(now-paintTime<20){requestAnimationFrame(tick);return;}paintTime=now;
  let dirty=!drawn;
- if(state.scene==='opening'&&!instant()&&!interacted)dirty=true;
- if(camera){const t=camera.duration?Math.min(1,(now-camera.start)/camera.duration):1,e=t*t*(3-2*t);distanceProgress=e;for(const k of ['lat','lon','scale','cx','cy']){const value=camera.from[k]+(camera.to[k]-camera.from[k])*e;if(k==='lat')lat=value;if(k==='lon')lon=value;if(k==='scale')scale=value;if(k==='cx')cx=value;if(k==='cy')cy=value;}dirty=true;if(t===1){const resolve=camera.resolve;camera=null;resolve();}}
- if(state.scene==='opening'&&!interacted&&!instant()){lon+=Math.min(now-last,50)*.0015;dirty=true;}last=now;
- if(dirty){draw();updateDistance();drawn=true;}requestAnimationFrame(tick);
+ if(camera){
+  const t=camera.duration?Math.min(1,(now-camera.start)/camera.duration):1,e=t*t*(3-2*t);
+  lat=camera.from.lat+(camera.to.lat-camera.from.lat)*e;lon=camera.from.lon+(camera.to.lon-camera.from.lon)*e;scale=camera.from.scale+(camera.to.scale-camera.from.scale)*e;cx=camera.from.cx+(camera.to.cx-camera.from.cx)*e;cy=camera.from.cy+(camera.to.cy-camera.from.cy)*e;
+  dirty=true;if(t===1){const resolve=camera.resolve;camera=null;resolve();}
+ }
+ if(dirty){draw();drawn=true;}requestAnimationFrame(tick);
 }
 new ResizeObserver(()=>{width=canvas.clientWidth;height=canvas.clientHeight;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=width*dpr;canvas.height=height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);if(!camera){const t=target();cx=t.cx;cy=t.cy;scale=t.scale;}drawn=false;}).observe(canvas);
 const image=new Image();image.onload=()=>{const c=document.createElement('canvas');c.width=1024;c.height=512;const cctx=c.getContext('2d',{willReadFrequently:true});cctx.drawImage(image,0,0,1024,512);texture=cctx.getImageData(0,0,1024,512);surfaceLat=null;drawn=false;};image.onerror=()=>{$('asset-status').textContent='Earth texture unavailable. Showing the geographic fallback.';};image.src='./public/earth.jpg';
