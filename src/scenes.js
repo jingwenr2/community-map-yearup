@@ -1,11 +1,15 @@
 import {members} from './team.js';
 export const initialState={scene:'person',memberId:members[0].id};
+// Collective closing remarks adapted from the supplied reflections: Christina's
+// speaking up, Ricardo's troubleshooting, Jenny/Yense's inclusion, and
+// Ricardo/Ibrahim's experience learning to navigate professional environments.
 export const sharedInsights=[
- {title:'Communities we share',text:'Year Up United connects Ricardo, Christina and Ibrahim. New York connects five of us, and Mexico is important to both Christina and Yense.'},
- {title:'What makes us different',text:'We find community through comedy, baking, education, entrepreneurship, student clubs, sports and exploring new places.'},
- {title:'What helps us belong',text:'Jenny values listening and inviting participation. Ibrahim values openness. Yense feels welcome when people keep talking with her and include her.'},
- {title:'What we bring to work',text:'Persistence, speaking up, adaptability, inclusive leadership, openness and focus are strengths reflected in our answers.'}
+ {title:'Finding our voice',text:'Year Up is helping us practice speaking up and taking on challenges. We don’t need to have everything figured out to take part.'},
+ {title:'Learning to keep trying',text:'In IT troubleshooting, we observe, listen to feedback and try again. We’re bringing that same patience to the way we learn.'},
+ {title:'Helping each other belong',text:'We can listen, invite someone into the conversation and make space for people who are quieter. Small actions help us feel included.'},
+ {title:'Our next step',text:'We’re learning how to navigate professional environments. We want to carry our cultures, our focus and our willingness to learn into our first careers.'}
 ];
+
 export function step(state,action){
  if(typeof action==='object'&&action.type==='select')return members.some(m=>m.id===action.memberId)?{scene:'person',memberId:action.memberId}:state;
  if(action==='home'||action==='choose')return {...initialState};
