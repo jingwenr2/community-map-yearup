@@ -47,8 +47,9 @@ async function go(action,id){
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.member)go(null,b.dataset.member);else if(b.dataset.action)go(b.dataset.action);});
 document.addEventListener('keydown',e=>{if(e.target.matches('input')||e.altKey||e.metaKey||e.ctrlKey)return;if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();go(e.key==='ArrowRight'?'next':'back');}if(e.key==='Escape'&&$('map-information').open)$('map-information').removeAttribute('open');});
 $('instant').checked=reduced.matches;
+try{$('instant').checked||=localStorage.getItem('yearup-reduce-motion')==='true';}catch{}
 function syncMotion(){if(camera&&instant())camera.duration=0;drawn=false;}
-$('instant').onchange=syncMotion;reduced.addEventListener('change',syncMotion);
+$('instant').onchange=()=>{try{localStorage.setItem('yearup-reduce-motion',String($('instant').checked));}catch{}syncMotion();};reduced.addEventListener('change',syncMotion);
 function project(latitude,longitude,lift=1){const a=latitude*rad,b=(longitude-lon)*rad,c=lat*rad;return {x:width*cx+radius*Math.cos(a)*Math.sin(b)*lift,y:height*cy-radius*(Math.cos(c)*Math.sin(a)-Math.sin(c)*Math.cos(a)*Math.cos(b))*lift,z:Math.sin(c)*Math.sin(a)+Math.cos(c)*Math.cos(a)*Math.cos(b)};}
 function line(points,color){ctx.beginPath();let pen=false;for(const [lo,la]of points){const p=project(la,lo,1.008);if(p.z>.01){if(pen)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);pen=true;}else pen=false;}ctx.strokeStyle=color;ctx.lineWidth=.9;ctx.stroke();}
 function earth(){
@@ -95,7 +96,7 @@ function draw(){
 
 }
 function drawMapLabels(){
- const small=width<700,occupied=[...$('markers').children].map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top),w:90,h:42})),placed=[];
+ const small=width<700,occupied=[...$('markers').querySelectorAll('.place-name')].map(e=>{const r=e.getBoundingClientRect(),c=canvas.getBoundingClientRect();return{x:r.left-c.left+r.width/2,y:r.top-c.top+r.height/2,w:r.width+8,h:r.height+8};}),placed=[];
  ctx.save();ctx.beginPath();ctx.arc(width*cx,height*cy,radius*.98,0,Math.PI*2);ctx.clip();ctx.textAlign='center';ctx.textBaseline='middle';
  for(const label of mapLabels){
   for(const q of label.anchors.map(([a,b])=>project(a,b)).sort((a,b)=>b.z-a.z)){
@@ -112,28 +113,40 @@ function drawMapLabels(){
  ctx.restore();
 }
 function renderPlaceMarkers(entries){
- const visible=entries.map(e=>({...e,q:project(places[e.l.place].lat,places[e.l.place].lon)})).filter(e=>e.q.z>.10);
+ const unique=new Map();
+ for(const e of entries){
+  if(!unique.has(e.l.place))unique.set(e.l.place,{...e,people:[]});
+  unique.get(e.l.place).people.push(e.m.shortName);
+ }
+ const visible=[...unique.values()].map(e=>({...e,q:project(places[e.l.place].lat,places[e.l.place].lon)})).filter(e=>e.q.z>.10);
  const shortName={queens:'Queens',eighth:'Eighth Avenue',bedstuy:'Bed-Stuy',fuzhou:'Fuzhou',chengdu:'Chengdu',newyork:'New York'};
- const groups=[];
- for(const e of visible){const group=groups.find(g=>Math.hypot(g[0].q.x-e.q.x,g[0].q.y-e.q.y)<45);if(group)group.push(e);else groups.push([e]);}
- const active=new Set();let leaders='';
- for(const group of groups)group.forEach((e,index)=>{
-  const key=e.m.id+'-'+e.l.place;active.add(key);const p=places[e.l.place];
-  const angle=(-135+index*270/Math.max(1,group.length-1))*rad;
-  let dx=group.length>1?Math.cos(angle)*52:0,dy=group.length>1?Math.sin(angle)*40:-22;
-  const labelHalf=Math.max(24,(shortName[e.l.place]||p.name).length*3);
-  dx=Math.max(labelHalf+8-e.q.x,Math.min(width-labelHalf-8-e.q.x,dx));dy=Math.max(14-e.q.y,Math.min(height-14-e.q.y,dy));
+ const placed=[],active=new Set();let leaders='';
+ for(const e of visible){
+  const key=e.m.id+'-'+e.l.place,p=places[e.l.place];active.add(key);
   let button=$('markers').querySelector(`[data-marker-key="${key}"]`);
-  if(!button){button=document.createElement('button');button.className='place-marker';button.dataset.markerKey=key;button.dataset.member=e.m.id;button.innerHTML=`<span class="place-name">${shortName[e.l.place]||p.name}</span>`;$('markers').append(button);}
+  if(!button){button=document.createElement('button');button.className='place-marker';button.dataset.markerKey=key;button.innerHTML='<span class="place-name"></span>';$('markers').append(button);}
+  button.dataset.member=e.m.id;
   button.style.left=e.q.x+'px';button.style.top=e.q.y+'px';button.dataset.anchorX=e.q.x;button.dataset.anchorY=e.q.y;
-  const label=button.querySelector('.place-name');label.style.left=dx+'px';label.style.top=dy+'px';
-  button.title=`${e.m.shortName} · ${p.name} · ${e.l.types.map(t=>connectionTypes[t].label).join(' / ')}`;
+  const label=button.querySelector('.place-name');label.textContent=shortName[e.l.place]||p.name;
+  const w=label.offsetWidth,h=label.offsetHeight,candidates=[];
+  for(const distance of [28,56,84,112,140])for(const angle of [-90,-30,30,90,150,210]){
+   const x=Math.max(w/2+8,Math.min(width-w/2-8,e.q.x+Math.cos(angle*rad)*distance));
+   const y=Math.max(h/2+8,Math.min(height-h/2-8,e.q.y+Math.sin(angle*rad)*distance));
+   const overlap=placed.reduce((n,r)=>n+Math.max(0,(w+r.w)/2+10-Math.abs(x-r.x))*Math.max(0,(h+r.h)/2+8-Math.abs(y-r.y)),0);
+   const coversPoint=visible.some(v=>Math.abs(x-v.q.x)<w/2+8&&Math.abs(y-v.q.y)<h/2+8);
+   candidates.push({x,y,w,h,score:overlap*100+(coversPoint?10000:0)+distance});
+  }
+  const best=candidates.sort((a,b)=>a.score-b.score)[0];placed.push(best);
+  const dx=best.x-e.q.x,dy=best.y-e.q.y;
+  label.style.left=(22+dx)+'px';label.style.top=(22+dy)+'px';
+  button.title=`${e.people.join(', ')} · ${p.name} · ${e.l.types.map(t=>connectionTypes[t].label).join(' / ')}`;
   button.setAttribute('aria-label',button.title);button.setAttribute('aria-pressed',String(state.memberId===e.m.id));
-  leaders+=`<line x1="${e.q.x}" y1="${e.q.y}" x2="${e.q.x+dx}" y2="${e.q.y+dy}" stroke="#557c76"/>`;
- });
+  leaders+=`<line x1="${e.q.x}" y1="${e.q.y}" x2="${best.x}" y2="${best.y}" stroke="#557c76"/>`;
+ }
  for(const button of [...$('markers').children])if(!active.has(button.dataset.markerKey))button.remove();
  $('marker-leaders').innerHTML=leaders;
 }
+
 function tick(now){
  if(now-paintTime<20){requestAnimationFrame(tick);return;}paintTime=now;
  let dirty=!drawn;

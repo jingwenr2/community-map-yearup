@@ -71,3 +71,27 @@ Top three problems addressed:
 Custom Chrome checks covered all six photos, unchanged facts, one complete student screen, the final shared summary, geographic point alignment, Next/Back, keyboard controls, serial camera transitions, and reduced motion. Desktop text fits without clipping. Phone checks at 390×844, 320×568 and 430×932 confirmed natural page scrolling, no horizontal overflow, 44px navigation targets, readable final lines above fixed controls and scroll reset when selecting the next student.
 
 The skill’s final fold and full-page screenshots for all three widths were opened. Its local JSON reports and image sheets remain under `.taste-skill/` (ignored by Git); the user-facing site contains no audit labels or implementation notes.
+
+## Impeccable polish — 2026-11-04
+
+Read the installed Impeccable skill, its complete polish playbook and craft floor, plus the existing project design and critique. Context loading initially failed because the engine cache was unavailable. The official engine was subsequently initialized with permission; the existing project documentation remained the context source for this pass.
+
+Retained One motif, seed 907635137: a real person's voice beside a globe of their actual places. No redraw, new imagery, biographies or extra animations.
+
+ROUND 3
+Seen in one second: one real student beside the softly colored Earth.
+Idea (one sentence): the six students share their own communities through their documented places.
+Live thing: choose a student to change the complete story and rotate Earth once.
+Layout words by section: person=portrait-led split / phone=globe then story / summary=plain reading sequence.
+Scores: design 6.5 · usability 8 · creativity 8 · content 8.5 → overall 7.5 (self-review).
+Caps applied: the general four-picture rubric remains intentionally constrained by the one-photo-per-person brief.
+Top three problems and fixes:
+1. `community-map-large-portraits/summary.png` before polish: New York labels overlap. Position labels using their measured dimensions and collision costs; coalesce the exact same place while keeping people in the accessible name. Geographic coordinates remain unchanged.
+2. Phone fold screenshots: the persistent controls consume 230px. Reduce their footprint to 202px while retaining six 44px-high name targets, readable labels and enough page padding to scroll the complete story above them.
+3. Map circles were 8–9px click targets. Keep the visible dots small but give each a 44px target, a focus treatment and a clickable place label. Align continent labels using actual place-label bounds.
+
+Also consolidated cascading obsolete CSS, improved summary text contrast, themed selection, refined hover/pressed/disabled states and stored the visitor's reduce-motion choice with a storage-denied fallback.
+
+Validation: `npm run check` and `npm run build` pass. Actual Chrome checks cover all six loaded photos, all profiles and the summary fitting at 1366×768, responsive layouts at 1024/390/320/430px, scrolling final lines above controls, aligned anchors, keyboard arrows, serial navigation and the configured 500ms camera animation (611ms end-to-end with polling). Final production inspector: 0 FAIL, 3 WARN, unchanged from the passing baseline. All six final inspector screenshots were opened. Source lint for the rendering files: 0 FAIL, 2 Inter warnings (the requested font). A broader data-file lint also flags original unused symbol and index fields in `team.js`; these are preserved source answers, not rendered decoration.
+
+Impeccable's actual rendered mobile scan completed and reported only `cream-palette`, retained because the user specifically chose warm white. The taste inspector's warm-white, no-video and person-name-heading warnings remain intentional for this presentation. No checks are claimed as eliminating these intentional findings.
