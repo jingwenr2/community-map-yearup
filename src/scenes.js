@@ -1,13 +1,15 @@
 import {members} from './team.js';
 export const initialState={scene:'person',memberId:members[0].id};
-// Collective closing remarks adapted from the supplied reflections: Christina's
-// speaking up, Ricardo's troubleshooting, Jenny/Yense's inclusion, and
-// Ricardo/Ibrahim's experience learning to navigate professional environments.
+// Official Year Up United core-value names, with original collective commitments.
+// Source: https://www.yearup.org/about/our-mission
+// These are aspirations for our group, not claims about individual track curricula.
 export const sharedInsights=[
- {title:'Finding our voice',text:'Year Up is helping us practice speaking up and taking on challenges. We don’t need to have everything figured out to take part.'},
- {title:'Learning to keep trying',text:'In IT troubleshooting, we observe, listen to feedback and try again. We’re bringing that same patience to the way we learn.'},
- {title:'Helping each other belong',text:'We can listen, invite someone into the conversation and make space for people who are quieter. Small actions help us feel included.'},
- {title:'Our next step',text:'We’re learning how to navigate professional environments. We want to carry our cultures, our focus and our willingness to learn into our first careers.'}
+ {title:'Respect and value others',text:'We listen and make room for quieter voices.'},
+ {title:'Engage and embrace diversity',text:'Our different backgrounds give us more to learn.'},
+ {title:'Build trust, be honest',text:'We ask for help and speak honestly.'},
+ {title:'Strive to learn',text:'We ask questions, use feedback and try again.'},
+ {title:'Be accountable',text:'We aim to own our mistakes and follow through.'},
+ {title:'Work hard and have fun',text:'We make room for friendship as we work toward our futures.'}
 ];
 
 export function step(state,action){

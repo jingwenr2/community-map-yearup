@@ -16,7 +16,8 @@ for(const m of members){
 assert.deepEqual(state,{scene:'summary',memberId:null});
 assert.deepEqual(step(state,'next'),state);
 assert.deepEqual(step(initialState,'connections'),state);
-assert.equal(sharedInsights.length,4);
+assert.equal(sharedInsights.length,6);
+assert.deepEqual(sharedInsights.map(i=>i.title),['Respect and value others','Engage and embrace diversity','Build trust, be honest','Strive to learn','Be accountable','Work hard and have fun']);
 assert(sharedInsights.every(i=>i.title&&i.text));
 assert.deepEqual(step(initialState,{type:'select',memberId:'unknown'}),initialState);
 for(const text of ['president of both the Math Club and Chinese Culture Club','five or six','fun, educational','become friends','making space for others','take part','listening'])assert(profileStories.jenny.includes(text));

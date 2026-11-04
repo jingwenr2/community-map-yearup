@@ -21,7 +21,7 @@ function render(){
  let html='';
  if(m){
   html=`${identity(m)}<p class="personal-story">${profileStories[m.id]}</p>`;
- }else html=`<h1 class="scene-title">What we’re learning at Year Up</h1><div class="shared-summary">${sharedInsights.map(i=>`<section><h2>${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
+ }else html=`<h1 class="scene-title">Different tracks. Shared values.</h1><p class="summary-intro">Across our tracks at Year Up United, these are the values we want to put into practice.</p><div class="shared-summary">${sharedInsights.map(i=>`<section><h2>${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
  $('content').innerHTML=html;$('content').scrollTop=0;
  $('progress').textContent=summary?'Together':`${members.findIndex(n=>n.id===m.id)+1} of ${members.length}`;
  $('next').textContent=summary?'Next →':members.at(-1).id===m.id?'Shared summary →':'Next →';

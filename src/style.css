@@ -44,7 +44,8 @@ input{accent-color:var(--teal);width:16px;height:16px;margin:0}
 #map-information p{position:absolute;right:0;bottom:42px;margin:0;width:300px;max-width:82vw;padding:20px;background:#e8ede4;font-size:13px;line-height:1.7;color:#475b50}
 #asset-status{position:absolute;bottom:144px;left:var(--pad);font-size:13px;color:var(--muted);max-width:300px;z-index:6}
 .scene-title{font-size:32px;line-height:1.2;letter-spacing:-.02em;font-weight:500;margin:0 0 18px;text-wrap:balance}
-.shared-summary{display:grid;gap:13px}.shared-summary h2{font-size:15px;font-weight:600;line-height:1.5;margin:0 0 6px}.shared-summary p{font-size:16px;line-height:1.65;color:var(--ink);margin:0;text-wrap:pretty}
+.summary-intro{font-size:16px;line-height:1.6;margin:0 0 16px;color:var(--muted)}
+.shared-summary{display:grid;gap:8px}.shared-summary h2{font-size:15px;font-weight:600;line-height:1.5;margin:0 0 6px}.shared-summary p{font-size:16px;line-height:1.65;color:var(--ink);margin:0;text-wrap:pretty}
 #exhibit[data-scene=summary] #content{width:min(450px,35vw)}
 @media(min-width:701px) and (max-width:1100px){
  .identity{gap:20px}.profile-photo{width:130px;height:156px}.student-name{font-size:34px}.primary-community{font-size:15px}.personal-story{font-size:16px}
