@@ -1,0 +1,4 @@
+Night-light texture: earth_lights_2048.png distributed in three.js examples.
+Source: https://github.com/mrdoob/three.js/blob/dev/examples/textures/planets/earth_lights_2048.png
+Project license: MIT; see earth-night-LICENSE.txt.
+The night-light raster is visual context, not additional student locations.

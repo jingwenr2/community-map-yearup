@@ -4,11 +4,11 @@ import {mapLabels} from './map-labels.js';
 import {initialState,step,sharedInsights,profileStories,primaryCommunities} from './scenes.js';
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state={...initialState},busy=false,lat=24,lon=-35,scale=.94,cx=.69,cy=.45,width=0,height=0,radius=0;
-let camera=null,texture=null,world=[],drawn=false,paintTime=0;
+let camera=null,texture=null,nightTexture=null,world=[],drawn=false,paintTime=0;
 let surfaceLat=null,surfaceLon=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),canvas=$('globe'),ctx=canvas.getContext('2d'),rad=Math.PI/180;
-const surface=document.createElement('canvas');surface.width=surface.height=440;const surfaceCtx=surface.getContext('2d');
-const sphere=surfaceCtx.createImageData(440,440);
+const surface=document.createElement('canvas');surface.width=surface.height=640;const surfaceCtx=surface.getContext('2d');
+const sphere=surfaceCtx.createImageData(640,640);
 const instant=()=>reduced.matches||$('instant').checked;
 const member=()=>members.find(m=>m.id===state.memberId);
 const avatar=(m,extra='')=>`<span class="avatar ${extra}" style="--accent:${m.color};--photo-position:${m.photoPosition||'50% 50%'};--photo-scale:${m.photoScale||1};--photo-origin:${m.photoOrigin||'50% 50%'}"><img src="${esc(m.photo)}" alt="${esc(m.name)}" draggable="false"></span>`;
@@ -54,45 +54,69 @@ try{$('instant').checked||=localStorage.getItem('yearup-reduce-motion')==='true'
 function syncMotion(){if(camera&&instant())camera.duration=0;drawn=false;}
 $('instant').onchange=()=>{try{localStorage.setItem('yearup-reduce-motion',String($('instant').checked));}catch{}syncMotion();};reduced.addEventListener('change',syncMotion);
 function project(latitude,longitude,lift=1){const a=latitude*rad,b=(longitude-lon)*rad,c=lat*rad;return {x:width*cx+radius*Math.cos(a)*Math.sin(b)*lift,y:height*cy-radius*(Math.cos(c)*Math.sin(a)-Math.sin(c)*Math.cos(a)*Math.cos(b))*lift,z:Math.sin(c)*Math.sin(a)+Math.cos(c)*Math.cos(a)*Math.cos(b)};}
-function line(points,color){ctx.beginPath();let pen=false;for(const [lo,la]of points){const p=project(la,lo,1.008);if(p.z>.01){if(pen)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);pen=true;}else pen=false;}ctx.strokeStyle=color;ctx.lineWidth=.9;ctx.stroke();}
+function line(points,color,arched=false){
+ ctx.save();ctx.beginPath();let pen=false;
+ for(let index=0;index<points.length;index++){
+  const [lo,la]=points[index],lift=arched?1.008+.11*Math.sin(Math.PI*index/(points.length-1)):1.008;
+  const p=project(la,lo,lift);
+  if(p.z>.01){if(pen)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);pen=true;}else pen=false;
+ }
+ ctx.strokeStyle=color;ctx.lineWidth=arched?1.25:.65;
+ if(arched){ctx.shadowColor='#e7b968';ctx.shadowBlur=4;}
+ ctx.stroke();ctx.restore();
+}
+
 function earth(){
  if(surfaceLat===lat&&surfaceLon===lon){ctx.drawImage(surface,width*cx-radius,height*cy-radius,radius*2,radius*2);return;}
  surfaceLat=lat;surfaceLon=lon;
- const size=440,r=219,sin=Math.sin(lat*rad),cos=Math.cos(lat*rad),data=sphere.data;
+ const size=640,r=319,sin=Math.sin(lat*rad),cos=Math.cos(lat*rad),data=sphere.data;
  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
   const u=(x-r)/r,v=(r-y)/r,z2=1-u*u-v*v,i=(y*size+x)*4;
   if(z2<0){data[i+3]=0;continue;}const z=Math.sqrt(z2),latitude=Math.asin(v*cos+z*sin),longitude=Math.atan2(u,z*cos-v*sin)+lon*rad;
   const tx=((Math.floor((longitude/(2*Math.PI)+.5)*texture.width)%texture.width)+texture.width)%texture.width,ty=Math.min(texture.height-1,Math.max(0,Math.floor((.5-latitude/Math.PI)*texture.height))),j=(ty*texture.width+tx)*4;
   const red=texture.data[j],green=texture.data[j+1],blue=texture.data[j+2],ocean=blue>red*1.12&&blue>green*1.02;
-  const detail=(red+green+blue)/765,light=.91+.09*Math.max(0,-u*.25+v*.2+z*.9);
-  const base=ocean?[139+detail*28,183+detail*25,194+detail*24]:[182+detail*30,194+detail*26,173+detail*34];
-  data[i]=base[0]*light;data[i+1]=base[1]*light;data[i+2]=base[2]*light;data[i+3]=255;
+  const light=Math.max(0,-u*.62+v*.28+z*.72),shade=.17+.83*light,edge=.72+.28*Math.pow(z,.35);
+  const base=ocean?[7+red*.26,25+green*.48,44+blue*.58]:[red*.76+8,green*.83+9,blue*.74+12];
+  let glow=0;
+  if(nightTexture){
+   const nx=((Math.floor((longitude/(2*Math.PI)+.5)*nightTexture.width)%nightTexture.width)+nightTexture.width)%nightTexture.width;
+   const ny=Math.min(nightTexture.height-1,Math.max(0,Math.floor((.5-latitude/Math.PI)*nightTexture.height))),ni=(ny*nightTexture.width+nx)*4;
+   glow=Math.max(nightTexture.data[ni],nightTexture.data[ni+1],nightTexture.data[ni+2])/255;
+   glow=Math.pow(glow,1.35)*(.3+.7*(1-light));
+  }
+  data[i]=Math.min(255,base[0]*shade*edge+glow*255);
+  data[i+1]=Math.min(255,base[1]*shade*edge+glow*191);
+  data[i+2]=Math.min(255,base[2]*shade*edge+glow*94);
+  data[i+3]=255;
  }
  surfaceCtx.putImageData(sphere,0,0);ctx.drawImage(surface,width*cx-radius,height*cy-radius,radius*2,radius*2);
 }
 function networkDetails(){
  // Every illuminated point and every connection comes from a supplied place.
- for(let la=-60;la<=60;la+=30)line(Array.from({length:181},(_,i)=>[-180+i*2,la]),'#476e7114');
- for(let lo=-180;lo<180;lo+=30)line(Array.from({length:91},(_,i)=>[lo,-90+i*2]),'#476e7114');
+ for(let la=-60;la<=60;la+=30)line(Array.from({length:181},(_,i)=>[-180+i*2,la]),'#8db1c715');
+ for(let lo=-180;lo<180;lo+=30)line(Array.from({length:91},(_,i)=>[lo,-90+i*2]),'#8db1c715');
 
 }
 function draw(){
  ctx.clearRect(0,0,width,height);
  radius=Math.min(width*(width<700?.44:width<1100?.28:.31),height*(width<700?.46:.42))*scale;
  const x=width*cx,y=height*cy;
+ const atmosphere=ctx.createRadialGradient(x,y,radius*.96,x,y,radius*1.055);
+ atmosphere.addColorStop(0,'#5caee000');atmosphere.addColorStop(.45,'#5caee035');atmosphere.addColorStop(1,'#5caee000');
+ ctx.fillStyle=atmosphere;ctx.beginPath();ctx.arc(x,y,radius*1.055,0,Math.PI*2);ctx.fill();
  if(texture)earth();else{
   ctx.fillStyle='#a2c7ce';ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.fill();
   for(const polygon of world)line(polygon[0],'#78a7ab60');
  }
  networkDetails();
- ctx.strokeStyle='#738f8530';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.stroke();
+ ctx.strokeStyle='#78bce870';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.stroke();
  let visible=[];
  if(state.scene==='person'){
   const m=member();visible=m.locations.map((l,index)=>({m,l,portrait:index===0}));
-  for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,'#527d7c99');
+  for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,'#edc17ce0',true);
  }else{
   visible=members.flatMap(m=>{const local=m.locations.find(l=>places[l.place].region==='new-york');return [{m,l:m.locations[0],portrait:true},...(local&&local!==m.locations[0]?[{m,l:local}]:[])];});
-  for(const route of routes)line(route.points,'#527d7c50');
+  for(const route of routes)line(route.points,'#edc17caa',true);
  }
  renderPlaceMarkers(visible);
  drawMapLabels();
@@ -110,7 +134,7 @@ function drawMapLabels(){
   if([-1,1].some(dx=>[-1,1].some(dy=>Math.hypot(q.x+dx*w/2-width*cx,q.y+dy*h/2-height*cy)>radius*.98)))continue;
   if(occupied.some(r=>Math.abs(q.x-r.x)<(w+r.w)/2&&Math.abs(q.y-r.y)<(h+r.h)/2)||placed.some(r=>Math.abs(q.x-r.x)<(w+r.w)/2&&Math.abs(q.y-r.y)<(h+r.h)/2))continue;
   placed.push({x:q.x,y:q.y,w,h});
-  ctx.globalAlpha=Math.min(1,(q.z-.15)*2);ctx.strokeStyle='#b9d0cd80';ctx.lineWidth=3;ctx.lineJoin='round';ctx.strokeText(label.name,q.x,q.y);ctx.fillStyle=ocean?'#55777d':'#465e57';ctx.fillText(label.name,q.x,q.y);break;
+  ctx.globalAlpha=Math.min(1,(q.z-.15)*2);ctx.strokeStyle='#0b253be0';ctx.lineWidth=3;ctx.lineJoin='round';ctx.strokeText(label.name,q.x,q.y);ctx.fillStyle=ocean?'#a4bccb':'#d3dddf';ctx.fillText(label.name,q.x,q.y);break;
   }
  }
  ctx.restore();
@@ -170,3 +194,5 @@ const image=new Image();image.onload=()=>{const c=document.createElement('canvas
 fetch('./public/world.geo.json').then(r=>r.json()).then(data=>{world=data.features.flatMap(f=>f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates);drawn=false;}).catch(()=>{});
 document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement)$('asset-status').textContent=`Photo unavailable: ${e.target.alt}. Please reload.`;},true);
 render();requestAnimationFrame(tick);
+
+const nightImage=new Image();nightImage.onload=()=>{const c=document.createElement('canvas');c.width=1024;c.height=512;const context=c.getContext('2d',{willReadFrequently:true});context.drawImage(nightImage,0,0,1024,512);nightTexture=context.getImageData(0,0,1024,512);surfaceLat=null;drawn=false;};nightImage.src='./public/earth-night.png';

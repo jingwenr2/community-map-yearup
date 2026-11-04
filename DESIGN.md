@@ -65,3 +65,7 @@ The user specifically requires one visible student photo and just one short tran
 The group requested a blue background. The muted blue canvas now carries soft-white text and light-teal controls; map labels retain a pale blue surface for contrast against the globe. Mobile fixed controls use the same blue ground.
 
 The shared-values globe is the opening page and Home destination. Visitors can select any member using the flags and names or visible portrait markers. The existing person-to-person sequence still ends on the shared view.
+
+## Earth depth refinement
+
+The requested reference now informs the globe itself: preserve the supplied daytime Earth colors, use directional shading and a soft blue atmosphere, and composite a real night-light raster. Connections between documented places use restrained warm-gold raised arcs. No additional student locations or routes were introduced. The night-light source and project license are bundled under public/earth-night-CREDITS.txt and public/earth-night-LICENSE.txt. The globe render uses a 640px sphere raster rather than the former 440px raster.
