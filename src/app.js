@@ -88,10 +88,10 @@ function draw(){
  ctx.strokeStyle='#738f8530';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,y,radius,0,7);ctx.stroke();
  let visible=[];
  if(state.scene==='person'){
-  const m=member();visible=m.locations.map(l=>({m,l}));
+  const m=member();visible=m.locations.map((l,index)=>({m,l,portrait:index===0}));
   for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,'#527d7c99');
  }else{
-  visible=members.map(m=>({m,l:m.locations.find(l=>places[l.place].region==='new-york')||m.locations[0]}));
+  visible=members.flatMap(m=>{const local=m.locations.find(l=>places[l.place].region==='new-york');return [{m,l:m.locations[0],portrait:true},...(local&&local!==m.locations[0]?[{m,l:local}]:[])];});
   for(const route of routes)line(route.points,'#527d7c50');
  }
  renderPlaceMarkers(visible);
@@ -118,8 +118,9 @@ function drawMapLabels(){
 function renderPlaceMarkers(entries){
  const unique=new Map();
  for(const e of entries){
-  if(!unique.has(e.l.place))unique.set(e.l.place,{...e,people:[]});
-  unique.get(e.l.place).people.push(e.m.shortName);
+  const key=e.portrait?e.m.id+'-'+e.l.place:e.l.place;
+  if(!unique.has(key))unique.set(key,{...e,people:[]});
+  unique.get(key).people.push(e.m.shortName);
  }
  const visible=[...unique.values()].map(e=>({...e,q:project(places[e.l.place].lat,places[e.l.place].lon)})).filter(e=>e.q.z>.10);
  const shortName={queens:'Queens',eighth:'Eighth Avenue',bedstuy:'Bed-Stuy',fuzhou:'Fuzhou',chengdu:'Chengdu',newyork:'New York'};
@@ -130,9 +131,13 @@ function renderPlaceMarkers(entries){
   if(!button){button=document.createElement('button');button.className='place-marker';button.dataset.markerKey=key;button.innerHTML='<span class="place-name"></span>';$('markers').append(button);}
   button.dataset.member=e.m.id;
   button.style.left=e.q.x+'px';button.style.top=e.q.y+'px';button.dataset.anchorX=e.q.x;button.dataset.anchorY=e.q.y;
-  const label=button.querySelector('.place-name');label.textContent=shortName[e.l.place]||p.name;
+  const label=button.querySelector('.place-name');
+  if(e.portrait){
+   label.classList.add('portrait-pin');
+   if(!label.querySelector('img'))label.innerHTML=avatar(e.m,'map-portrait')+`<span class="pin-name">${esc(e.m.shortName)}</span>`;
+  }else{label.classList.remove('portrait-pin');label.textContent=shortName[e.l.place]||p.name;}
   const w=label.offsetWidth,h=label.offsetHeight,candidates=[];
-  for(const distance of [28,56,84,112,140])for(const angle of [-90,-30,30,90,150,210]){
+  for(const distance of (e.portrait?[56,84,112,140,168]:[28,56,84,112,140]))for(const angle of [-90,-30,30,90,150,210]){
    const x=Math.max(w/2+8,Math.min(width-w/2-8,e.q.x+Math.cos(angle*rad)*distance));
    const y=Math.max(h/2+8,Math.min(height-h/2-8,e.q.y+Math.sin(angle*rad)*distance));
    const overlap=placed.reduce((n,r)=>n+Math.max(0,(w+r.w)/2+10-Math.abs(x-r.x))*Math.max(0,(h+r.h)/2+8-Math.abs(y-r.y)),0);

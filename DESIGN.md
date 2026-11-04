@@ -16,16 +16,16 @@ The six students' actual places form a shared atlas. A large globe is the stage,
 
 | Role | Value |
 | --- | --- |
-| Ground | Warm paper `#f7f5ef` |
-| Main text | Charcoal `#303936` |
-| Secondary text | Sage gray `#607068` |
-| Active control | Muted teal `#466c63` |
+| Ground | Muted blue `#183d55` |
+| Main text | Soft white `#f3f7f8` |
+| Secondary text | Pale blue-gray `#bbced8` |
+| Active control | Light teal `#aed8dc` |
 | Ocean | Soft sea blue, gently shaded |
 | Land | Pale gray-green, gently shaded |
 | English type | Bundled Inter, then system sans-serif |
 | Chinese type | PingFang SC, Microsoft YaHei, Noto Sans SC, sans-serif |
 
-Use one clear type hierarchy: student names at 28–46px, story text at 18px desktop / 15–16px narrow screens, one main community at 12–13px. Main reading text uses full charcoal; secondary notes use the muted role. Text should never depend on animation to become readable.
+Use one clear type hierarchy: student names at 28–46px, story text at 18px desktop / 15–16px narrow screens, one main community at 12–13px. Main reading text uses full soft-white ink; secondary notes use the muted role. Text should never depend on animation to become readable.
 
 Use consistent outer margins, 8/16/24/32px spacing relationships, and a readable story column. The globe occupies the larger visual field. Space separates elements; cards, glass panels, neon, stars, orbital ornaments and heavy borders are unnecessary.
 
@@ -33,7 +33,7 @@ Use consistent outer margins, 8/16/24/32px spacing relationships, and a readable
 
 - Desktop: one prominent authentic portrait with the name and one community; a three-sentence story below; a substantially larger globe to the right.
 - Narrow screens: a separate globe stage above the full story in normal document flow. Longer stories and the shared summary may scroll naturally. Fixed name navigation and Back/Next controls have comfortable touch targets and safe-area spacing. Do not force desktop slide dimensions onto phones; switching people returns to the start of the new story.
-- One portrait per screen. No portraits or flags repeated in the globe or bottom navigation.
+- Keep the large profile portrait. At the user’s request, circular portraits also appear on the globe, tied to each person’s primary supplied place by a leader line. Hide back-facing anchors and keep nearby portraits separate. Bottom navigation keeps names and country flags.
 - Geographic points use exact supplied coordinates. Nearby place labels may move with leader lines; their points do not move.
 - Continent/ocean labels are geographic context, small enough to remain secondary. Hide labels behind Earth or where they would be clipped or collide.
 - Bottom navigation contains names, a clear teal current-state name, and one Back/Next pair. Avoid duplicate counters and decorative labels.
@@ -61,3 +61,5 @@ Taste-skill dealt **One motif**, seed **907635137**, with the palette and type k
 Desktop portraits are now 160×192px, versus 78×94px before this pass. Laptop/tablet portraits use 130×156px where the story column is narrower. Phone portraits are 112×140px (96×120px on the smallest screens). Each photo keeps the supplied source and individual crop settings. Names and stories share a single visual group.
 
 The user specifically requires one visible student photo and just one short transition when changing people. Those constraints override taste-skill’s general marketing-page expectations of four simultaneous images, footage and multiple entrance animations. Functional progress now reads “1 of 6” rather than decorative zero-padded numbering.
+
+The group requested a blue background. The muted blue canvas now carries soft-white text and light-teal controls; map labels retain a pale blue surface for contrast against the globe. Mobile fixed controls use the same blue ground.
