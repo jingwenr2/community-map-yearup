@@ -17,7 +17,10 @@ function render(){
  const m=member(),summary=state.scene==='summary';$('exhibit').dataset.scene=state.scene;
  for(const id of ['navigation','presentation-controls','motion-control','member-selector','map-information'])$(id).hidden=false;
  $('map-information').removeAttribute('open');
- $('member-selector').innerHTML=members.map(m=>`<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}"><span>${m.shortName}</span></button>`).join('');
+ $('member-selector').innerHTML=members.map(m=>{
+  const place=places[m.locations[0].place];
+  return `<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}" title="${esc(m.shortName+' · '+place.country+' · '+m.locations[0].types.map(t=>connectionTypes[t].label).join(' / '))}"><span class="member-flag" role="img" aria-label="${esc(place.country)}">${place.flag}</span><span>${m.shortName}</span></button>`;
+ }).join('');
  let html='';
  if(m){
   html=`${identity(m)}<p class="personal-story">${profileStories[m.id]}</p>`;
