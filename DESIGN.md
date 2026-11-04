@@ -63,3 +63,5 @@ Desktop portraits are now 160×192px, versus 78×94px before this pass. Laptop/t
 The user specifically requires one visible student photo and just one short transition when changing people. Those constraints override taste-skill’s general marketing-page expectations of four simultaneous images, footage and multiple entrance animations. Functional progress now reads “1 of 6” rather than decorative zero-padded numbering.
 
 The group requested a blue background. The muted blue canvas now carries soft-white text and light-teal controls; map labels retain a pale blue surface for contrast against the globe. Mobile fixed controls use the same blue ground.
+
+The shared-values globe is the opening page and Home destination. Visitors can select any member using the flags and names or visible portrait markers. The existing person-to-person sequence still ends on the shared view.

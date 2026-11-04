@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import {members,places} from '../src/team.js';
 import {distanceToNewYork,newYorkReference} from '../src/connections.js';
 import {initialState,step,profileStories,sharedInsights} from '../src/scenes.js';
-assert.deepEqual(initialState,{scene:'person',memberId:members[0].id});
-assert.deepEqual(step(initialState,'back'),initialState);
-let state={...initialState};
+assert.deepEqual(initialState,{scene:'summary',memberId:null});
+assert.deepEqual(step(initialState,'back'),{scene:'person',memberId:members.at(-1).id});
+let state=step(initialState,{type:'select',memberId:members[0].id});
 for(const m of members){
  assert.equal(state.scene,'person');assert.equal(state.memberId,m.id);
  assert(profileStories[m.id]?.length>40);assert(/\bI\b/.test(profileStories[m.id]));assert.equal(profileStories[m.id].match(/[.!?](?:\s|$)/g)?.length,3);

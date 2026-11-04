@@ -3,7 +3,7 @@ import {routes} from './connections.js';
 import {mapLabels} from './map-labels.js';
 import {initialState,step,sharedInsights,profileStories,primaryCommunities} from './scenes.js';
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let state={...initialState},busy=false,lat=places[members[0].locations[0].place].lat,lon=places[members[0].locations[0].place].lon,scale=.94,cx=.69,cy=.45,width=0,height=0,radius=0;
+let state={...initialState},busy=false,lat=24,lon=-35,scale=.94,cx=.69,cy=.45,width=0,height=0,radius=0;
 let camera=null,texture=null,world=[],drawn=false,paintTime=0;
 let surfaceLat=null,surfaceLon=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),canvas=$('globe'),ctx=canvas.getContext('2d'),rad=Math.PI/180;

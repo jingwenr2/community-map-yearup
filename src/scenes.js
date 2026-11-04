@@ -1,5 +1,5 @@
 import {members} from './team.js';
-export const initialState={scene:'person',memberId:members[0].id};
+export const initialState={scene:'summary',memberId:null};
 // Official Year Up United core-value names, with original collective commitments.
 // Source: https://www.yearup.org/about/our-mission
 // These are aspirations for our group, not claims about individual track curricula.
