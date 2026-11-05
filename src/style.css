@@ -109,3 +109,18 @@ input{accent-color:var(--teal);width:16px;height:16px;margin:0}
  .audience-question{font-size:30px}.question-context{font-size:16px}
  .connection-options{margin:20px 0 24px}.connection-reflection p{font-size:16px}
 }
+
+/* The closing question takes the whole stage; only return navigation remains. */
+#exhibit[data-scene=question] #globe-stage{visibility:hidden;position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#exhibit[data-scene=question] #content{left:var(--pad);right:var(--pad);width:auto;top:47%;transform:translateY(-50%);max-height:calc(100svh - 200px);text-align:center;padding:8px 0}
+#exhibit[data-scene=question] .audience-question{max-width:1080px;margin:0 auto 32px;font-size:clamp(44px,5.5vw,88px);font-weight:650;line-height:1.12;letter-spacing:-.025em}
+#exhibit[data-scene=question] .question-context{font-size:20px}
+#exhibit[data-scene=question] .question-invitation{font-size:18px;margin-top:24px}
+@media(max-width:700px){
+ #exhibit[data-scene=question]{display:flex;flex-direction:column;justify-content:center;padding:88px var(--pad) calc(100px + env(safe-area-inset-bottom));min-height:100svh}
+ #exhibit[data-scene=question]::after{height:calc(76px + env(safe-area-inset-bottom))}
+ #exhibit[data-scene=question] #content{position:relative;left:auto;right:auto;top:auto;transform:none;width:100%;max-height:none;overflow:visible;margin:0;padding:8px 0}
+ #exhibit[data-scene=question] .audience-question{font-size:clamp(36px,8.8vw,56px);margin-bottom:24px}
+ #exhibit[data-scene=question] .question-context{font-size:16px}
+ #exhibit[data-scene=question] .question-invitation{font-size:16px;margin-top:20px}
+}

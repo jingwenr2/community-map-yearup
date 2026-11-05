@@ -18,6 +18,7 @@ function render(){
  const m=member(),summary=state.scene==='summary';$('exhibit').dataset.scene=state.scene;$('exhibit').dataset.member=m?.id||'';
  for(const id of ['navigation','presentation-controls','motion-control','member-selector','map-information'])$(id).hidden=false;
  $('map-information').removeAttribute('open');
+ for(const id of ['motion-control','member-selector','map-information'])$(id).hidden=state.scene==='question';
  $('member-selector').innerHTML=members.map(m=>{
   const place=places[m.locations[0].place];
   return `<button data-member="${m.id}" aria-pressed="${state.memberId===m.id}" title="${esc(m.shortName+' · '+place.country+' · '+m.locations[0].types.map(t=>connectionTypes[t].label).join(' / '))}"><span class="member-flag" role="img" aria-label="${esc(place.country)}">${place.flag}</span><span>${m.shortName}</span></button>`;
@@ -48,7 +49,7 @@ async function go(action,id){
  if(busy)return;
  const next=step(state,id?{type:'select',memberId:id}:action);
  if(JSON.stringify(next)===JSON.stringify(state))return;
- const moves=(next.scene==='person'&&next.memberId!==state.memberId)||(next.scene==='question'&&state.scene!=='question');
+ const moves=next.scene==='person'&&next.memberId!==state.memberId;
  busy=true;$('exhibit').setAttribute('aria-busy','true');$('content').classList.add('departing');
  state=next;const t=target();t.lon=lon+((t.lon-lon+540)%360-180);
  if(moves&&!instant())await new Promise(resolve=>{camera={start:performance.now(),duration:500,from:{lat,lon,scale,cx,cy},to:t,resolve};});
