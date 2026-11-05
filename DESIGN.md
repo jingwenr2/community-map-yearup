@@ -2,7 +2,7 @@
 
 ## Design idea
 
-The six students' actual places form a shared atlas. A large globe is the stage, and each student's own account is the voice. This is a classroom presentation with seven screens, not a profile directory or a scrolling marketing page.
+The six students' actual places form a shared atlas. A large globe is the stage, and each student's own account is the voice. This is a classroom presentation with one scene at a time, rather than a profile directory or a scrolling marketing page.
 
 ## Source material
 
@@ -37,11 +37,11 @@ Use consistent outer margins, 8/16/24/32px spacing relationships, and a readable
 - Geographic points use exact supplied coordinates. Nearby place labels may move with leader lines; their points do not move.
 - Continent/ocean labels are geographic context, small enough to remain secondary. Hide labels behind Earth or where they would be clipped or collide.
 - Bottom navigation contains names, a clear teal current-state name, and one Back/Next pair. Avoid duplicate counters and decorative labels.
-- The final screen shows all four shared insights as plain text, not a card grid.
+- Home shows six official core values as plain text. Community exploration follows the stories, and one audience question closes the presentation.
 
 ## Interaction
 
-Six person screens followed by one shared summary. One 500ms globe transition only when changing people. Reveal the new person's content together after the transition; do not reveal sentences individually. Ignore overlapping navigation clicks. Arrow keys follow Back/Next. Preserve accessible focus, button names and reduced-motion behavior.
+A shared-values Home, six person screens, a community explorer and one audience question. One 500ms globe transition when changing people or entering the final question. Reveal the new person's content together after the transition; do not reveal sentences individually. Ignore overlapping navigation clicks. Arrow keys follow Back/Next. Preserve accessible focus, button names and reduced-motion behavior.
 
 ## Browser review
 
@@ -69,3 +69,9 @@ The shared-values globe is the opening page and Home destination. Visitors can s
 ## Earth depth refinement
 
 The requested reference now informs the globe itself: preserve the supplied daytime Earth colors, use directional shading and a soft blue atmosphere, and composite a real night-light raster. Connections between documented places use restrained warm-gold raised arcs. No additional student locations or routes were introduced. The night-light source and project license are bundled under public/earth-night-CREDITS.txt and public/earth-night-LICENSE.txt. The globe render uses a 640px sphere raster rather than the former 440px raster.
+
+## Community exploration and audience finale
+
+The values globe remains Home. Explore stories visits the six people in order, followed by the community explorer and one audience question. Header “Our connections” opens the explorer directly. Its five categories (Year Up, New York, Mexico, school/learning and movies/shows) are supported by the existing answers; distinct schools are explicitly not described as the same institution. Selecting a category highlights only its documented members and their routes. Related names open the corresponding full story. Filter changes retain keyboard focus on the selected filter.
+
+The final step gently pulls the globe back over 500ms and reveals the complete question: “What’s one small thing that makes you feel included?” The question invites classroom conversation; no response data is collected. Reduced motion skips the camera movement. Back returns to connections; the final forward control returns Home. Photos, story details, colored geographic anchors and QR destination remain intact.

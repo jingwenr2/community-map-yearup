@@ -91,3 +91,21 @@ input{accent-color:var(--teal);width:16px;height:16px;margin:0}
 .stories-label{font-size:13px;font-weight:500;color:var(--ink)}
 .shared-summary h2{font-weight:750;color:#f3ce91}
 @media(max-width:700px){.yearup-wordmark{font-size:20px}.stories-label{font-size:11px}header button:not(.site-title){font-size:12px}.site-title{gap:8px}}
+
+.connection-options{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 28px}
+.connection-options button{min-height:44px;padding:10px 14px;background:#284e65;color:var(--ink);font-size:14px}
+.connection-options button[aria-pressed=true]{background:var(--teal);color:var(--paper);font-weight:650}
+.connection-options button:hover{background:#3a647a;color:var(--ink)}
+.connection-reflection h2{font-size:24px;font-weight:600;margin:0 0 14px;color:#f3ce91}
+.connection-reflection p{font-size:18px;line-height:1.65;margin:0;color:var(--ink)}
+.connected-people{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:20px}
+.connected-people button{font-size:15px;min-height:44px;color:var(--person-color);font-weight:600;padding:8px 0}
+#exhibit[data-scene=question] #content{width:min(520px,41vw)}
+.audience-question{font-size:clamp(30px,2.7vw,38px);font-weight:550;line-height:1.25;letter-spacing:-.02em;text-wrap:balance;margin:0 0 28px}
+.question-context{font-size:18px;line-height:1.7;margin:0;color:var(--muted)}
+.question-invitation{font-size:16px;line-height:1.6;margin:28px 0 0;color:#f3ce91}
+@media(max-width:700px){
+ #exhibit[data-scene=question] #content{width:auto}
+ .audience-question{font-size:30px}.question-context{font-size:16px}
+ .connection-options{margin:20px 0 24px}.connection-reflection p{font-size:16px}
+}

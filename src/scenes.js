@@ -12,17 +12,31 @@ export const sharedInsights=[
  {title:'Work hard and have fun',text:'We make room for friendship as we work toward our futures.'}
 ];
 
+export const communityConnections=[
+ {id:'yearup',title:'Year Up',members:members.map(m=>m.id),text:'We’re in different tracks at Year Up United. Our shared core values connect us as we learn and grow.'},
+ {id:'newyork',title:'New York',members:['ricardo','christina','jenny','ibrahim','yense'],text:'Queens and Brooklyn connect five of our stories through home, upbringing or community.'},
+ {id:'mexico',title:'Mexico',members:['christina','yense'],text:'Christina connects through family and culture. Yense describes feeling loved and welcomed by her community in Mexico.'},
+ {id:'learning',title:'School & learning',members:['ricardo','fariza','jenny','ibrahim'],text:'Hunter College, studying in China, BMCC and Baruch are different learning communities that have shaped our stories.'},
+ {id:'movies',title:'Movies & shows',members:['christina','yense'],text:'Christina enjoys horror movies. Yense enjoys movies and shows. Shared interests connect us beyond geography.'}
+];
+const connectionState=()=>({scene:'connections',memberId:null,connectionKey:'yearup'});
 export function step(state,action){
- if(typeof action==='object'&&action.type==='select')return members.some(m=>m.id===action.memberId)?{scene:'person',memberId:action.memberId}:state;
+ if(typeof action==='object'){
+  if(action.type==='select')return members.some(m=>m.id===action.memberId)?{scene:'person',memberId:action.memberId}:state;
+  if(action.type==='connection')return communityConnections.some(c=>c.id===action.key)?{scene:'connections',memberId:null,connectionKey:action.key}:state;
+ }
  if(action==='home'||action==='choose')return {...initialState};
- if(action==='connections')return {scene:'summary',memberId:null};
+ if(action==='connections')return connectionState();
  const index=members.findIndex(m=>m.id===state.memberId);
  if(action==='next'){
   if(state.scene==='summary')return {scene:'person',memberId:members[0].id};
-  return index<members.length-1?{scene:'person',memberId:members[index+1].id}:{scene:'summary',memberId:null};
+  if(state.scene==='connections')return {scene:'question',memberId:null};
+  if(state.scene==='question')return {...initialState};
+  return index<members.length-1?{scene:'person',memberId:members[index+1].id}:connectionState();
  }
  if(action==='back'){
-  if(state.scene==='summary')return {scene:'person',memberId:members.at(-1).id};
+  if(state.scene==='question')return connectionState();
+  if(state.scene==='summary'||state.scene==='connections')return {scene:'person',memberId:members.at(-1).id};
   return index>0?{scene:'person',memberId:members[index-1].id}:state;
  }
  return state;

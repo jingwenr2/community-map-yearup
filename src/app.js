@@ -1,7 +1,7 @@
 import {members,places,connectionTypes} from './team.js';
 import {routes} from './connections.js';
 import {mapLabels} from './map-labels.js';
-import {initialState,step,sharedInsights,profileStories,primaryCommunities} from './scenes.js';
+import {initialState,step,sharedInsights,profileStories,primaryCommunities,communityConnections} from './scenes.js';
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state={...initialState},busy=false,lat=64,lon=-10,scale=.94,cx=.69,cy=.45,width=0,height=0,radius=0;
 let camera=null,texture=null,nightTexture=null,world=[],drawn=false,paintTime=0;
@@ -11,6 +11,7 @@ const surface=document.createElement('canvas');surface.width=surface.height=640;
 const sphere=surfaceCtx.createImageData(640,640);
 const instant=()=>reduced.matches||$('instant').checked;
 const member=()=>members.find(m=>m.id===state.memberId);
+const activeConnection=()=>communityConnections.find(c=>c.id===state.connectionKey)||communityConnections[0];
 const avatar=(m,extra='')=>`<span class="avatar ${extra}" style="--accent:${m.color};--photo-position:${m.photoPosition||'50% 50%'};--photo-scale:${m.photoScale||1};--photo-origin:${m.photoOrigin||'50% 50%'}"><img src="${esc(m.photo)}" alt="${esc(m.name)}" draggable="false"></span>`;
 const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h1 class="student-name">${m.name}</h1><p class="primary-community">${primaryCommunities[m.id]}</p></div></div>`;
 function render(){
@@ -24,30 +25,38 @@ function render(){
  let html='';
  if(m){
   html=`${identity(m)}<p class="personal-story">${profileStories[m.id]}</p>`;
+ }else if(state.scene==='connections'){
+  const connection=activeConnection();
+  html=`<h1 class="scene-title">Find our connections.</h1><p class="summary-intro">Our communities reach beyond the places on this globe.</p><div class="connection-options" role="group" aria-label="Shared communities">${communityConnections.map(c=>`<button data-connection="${c.id}" aria-pressed="${connection.id===c.id}">${esc(c.title)}</button>`).join('')}</div><div class="connection-reflection"><h2>${esc(connection.title)}</h2><p>${esc(connection.text)}</p><div class="connected-people" role="group" aria-label="People connected through ${esc(connection.title)}">${connection.members.map(id=>{const person=members.find(m=>m.id===id);return `<button data-member="${id}" style="--person-color:${person.color}">${esc(person.shortName)}</button>`;}).join('')}</div></div>`;
+ }else if(state.scene==='question'){
+  html='<h1 class="audience-question">What’s one small thing that makes you feel included?</h1><p class="question-context">Think about a class, a team or a new workplace.</p><p class="question-invitation">We’d love to hear your answer.</p>';
  }else html=`<h1 class="scene-title">Different tracks. Shared values.</h1><p class="summary-intro">Across our tracks at Year Up United, these are the values we want to put into practice.</p><div class="shared-summary">${sharedInsights.map(i=>`<section><h2>${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
  $('content').innerHTML=html;$('content').scrollTop=0;
- $('progress').textContent=summary?'LCM is family':`${members.findIndex(n=>n.id===m.id)+1} of ${members.length}`;
- $('next').textContent=summary?'Explore stories →':members.at(-1).id===m.id?'Shared summary →':'Next →';
- $('next').disabled=false;$('back').disabled=!summary&&m.id===members[0].id;
+ const labels={summary:'LCM is family',connections:'Our connections',question:'Your turn'};
+ $('progress').textContent=labels[state.scene]||`${members.findIndex(n=>n.id===m.id)+1} of ${members.length}`;
+ const nextLabels={summary:'Explore stories →',connections:'Final question →',question:'Back to our map →'};
+ $('next').textContent=nextLabels[state.scene]||(members.at(-1).id===m.id?'Connections →':'Next →');
+ $('next').disabled=false;$('back').disabled=state.scene==='person'&&m.id===members[0].id;
+
  drawn=false;
 }
 function target(){
  const mobile=canvas.clientWidth<700,m=member(),p=m?places[m.locations[0].place]:{lat:64,lon:-10};
- return {lat:p.lat,lon:p.lon,scale:.94,cx:mobile?.5:canvas.clientWidth<1100?.73:.70,cy:mobile?.5:.45};
+ return {lat:p.lat,lon:p.lon,scale:state.scene==='question'?.86:.94,cx:mobile?.5:canvas.clientWidth<1100?.73:.70,cy:mobile?.5:.45};
 }
 async function go(action,id){
  if(busy)return;
  const next=step(state,id?{type:'select',memberId:id}:action);
  if(JSON.stringify(next)===JSON.stringify(state))return;
- const moves=next.scene==='person'&&next.memberId!==state.memberId;
+ const moves=(next.scene==='person'&&next.memberId!==state.memberId)||(next.scene==='question'&&state.scene!=='question');
  busy=true;$('exhibit').setAttribute('aria-busy','true');$('content').classList.add('departing');
  state=next;const t=target();t.lon=lon+((t.lon-lon+540)%360-180);
  if(moves&&!instant())await new Promise(resolve=>{camera={start:performance.now(),duration:500,from:{lat,lon,scale,cx,cy},to:t,resolve};});
  else{lat=t.lat;lon=t.lon;scale=t.scale;cx=t.cx;cy=t.cy;}
  render();draw();drawn=true;$('content').classList.remove('departing');busy=false;$('exhibit').removeAttribute('aria-busy');
- (state.scene==='summary'?$ ('back'):$('next')).focus({preventScroll:true});$('content').scrollTop=0;if(canvas.clientWidth<700)window.scrollTo(0,0);
+ (action?.type==='connection'?document.querySelector(`.connection-options [data-connection="${state.connectionKey}"]`):$('next')).focus({preventScroll:true});$('content').scrollTop=0;if(canvas.clientWidth<700)window.scrollTo(0,0);
 }
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.member)go(null,b.dataset.member);else if(b.dataset.action)go(b.dataset.action);});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.member)go(null,b.dataset.member);else if(b.dataset.connection)go({type:'connection',key:b.dataset.connection});else if(b.dataset.action)go(b.dataset.action);});
 document.addEventListener('keydown',e=>{if(e.target.matches('input')||e.altKey||e.metaKey||e.ctrlKey)return;if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();go(e.key==='ArrowRight'?'next':'back');}if(e.key==='Escape'&&$('map-information').open)$('map-information').removeAttribute('open');});
 $('instant').checked=reduced.matches;
 try{$('instant').checked||=localStorage.getItem('yearup-reduce-motion')==='true';}catch{}
@@ -117,8 +126,9 @@ function draw(){
   const m=member();visible=m.locations.map((l,index)=>({m,l,portrait:index===0}));
   for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,route.member.color,true);
  }else{
-  visible=members.flatMap(m=>{const local=m.locations.find(l=>places[l.place].region==='new-york');return [{m,l:m.locations[0],portrait:true},...(local&&local!==m.locations[0]?[{m,l:local}]:[])];});
-  for(const route of routes)line(route.points,route.member.color,true);
+  const shownMembers=state.scene==='connections'?members.filter(m=>activeConnection().members.includes(m.id)):members;
+  visible=shownMembers.flatMap(m=>{const local=m.locations.find(l=>places[l.place].region==='new-york');return [{m,l:m.locations[0],portrait:true},...(local&&local!==m.locations[0]?[{m,l:local}]:[])];});
+  for(const route of routes.filter(r=>shownMembers.some(m=>m.id===r.member.id)))line(route.points,route.member.color,true);
  }
  renderPlaceMarkers(visible);
  drawMapLabels();
