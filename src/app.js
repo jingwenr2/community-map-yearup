@@ -26,7 +26,7 @@ function render(){
  if(m){
   html=`${identity(m)}<p class="personal-story">${profileStories[m.id]}</p>`;
  }else if(state.scene==='question'){
-  html='<h1 class="audience-question">What’s one small thing that makes you feel included?</h1><p class="question-invitation">Thank you for listening.</p>';
+  html='<h1 class="audience-question">What’s one small thing that makes you feel included?</h1><p class="closing-family">LCM is family</p><p class="question-invitation">Thank you for listening.</p>';
  }else html=`<h1 class="scene-title">Different tracks. Shared values.</h1><p class="summary-intro">Across our tracks at Year Up United, these are the values we want to put into practice.</p><div class="shared-summary">${sharedInsights.map(i=>`<section><h2>${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
  $('content').innerHTML=html;$('content').scrollTop=0;
  const labels={summary:'LCM is family',question:'LCM is family'};
