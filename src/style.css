@@ -85,3 +85,9 @@ input{accent-color:var(--teal);width:16px;height:16px;margin:0}
 @media(max-width:700px){.map-portrait{width:48px;height:48px}.place-name.portrait-pin{min-width:58px}}
 .place-marker:hover .place-name.portrait-pin,.place-marker:focus-visible .place-name.portrait-pin{background:none;color:#f3f7f8}
 .place-marker:active:not(:disabled){transform:translate(-50%,-50%)}
+
+.site-title{display:flex;align-items:baseline;gap:10px}
+.yearup-wordmark{font-size:23px;font-weight:850;font-style:italic;letter-spacing:-.035em;line-height:1;color:#ffac66}
+.stories-label{font-size:13px;font-weight:500;color:var(--ink)}
+.shared-summary h2{font-weight:750;color:#f3ce91}
+@media(max-width:700px){.yearup-wordmark{font-size:20px}.stories-label{font-size:11px}header button:not(.site-title){font-size:12px}.site-title{gap:8px}}
