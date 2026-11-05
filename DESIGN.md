@@ -37,11 +37,11 @@ Use consistent outer margins, 8/16/24/32px spacing relationships, and a readable
 - Geographic points use exact supplied coordinates. Nearby place labels may move with leader lines; their points do not move.
 - Continent/ocean labels are geographic context, small enough to remain secondary. Hide labels behind Earth or where they would be clipped or collide.
 - Bottom navigation contains names, a clear teal current-state name, and one Back/Next pair. Avoid duplicate counters and decorative labels.
-- Home shows six official core values as plain text. Community exploration follows the stories, and one audience question closes the presentation.
+- Home shows six official core values as plain text. One large audience question and a thank-you close the presentation directly after the stories.
 
 ## Interaction
 
-A shared-values Home, six person screens, a community explorer and one audience question. One 500ms globe transition when changing people or entering the final question. Reveal the new person's content together after the transition; do not reveal sentences individually. Ignore overlapping navigation clicks. Arrow keys follow Back/Next. Preserve accessible focus, button names and reduced-motion behavior.
+A shared-values Home, six person screens and one audience question. One 500ms globe transition when changing people. Reveal the new person's content together after the transition; do not reveal sentences individually. Ignore overlapping navigation clicks. Arrow keys follow Back/Next. Preserve accessible focus, button names and reduced-motion behavior.
 
 ## Browser review
 
@@ -64,14 +64,14 @@ The user specifically requires one visible student photo and just one short tran
 
 The group requested a blue background. The muted blue canvas now carries soft-white text and light-teal controls; map labels retain a pale blue surface for contrast against the globe. Mobile fixed controls use the same blue ground.
 
-The shared-values globe is the opening page and Home destination. Visitors can select any member using the flags and names or visible portrait markers. The existing person-to-person sequence still ends on the shared view.
+The shared-values globe is the opening page and Home destination. Visitors can select any member using the flags and names or visible portrait markers. The person-to-person sequence ends on the full-screen audience question.
 
 ## Earth depth refinement
 
 The requested reference now informs the globe itself: preserve the supplied daytime Earth colors, use directional shading and a soft blue atmosphere, and composite a real night-light raster. Connections between documented places use restrained warm-gold raised arcs. No additional student locations or routes were introduced. The night-light source and project license are bundled under public/earth-night-CREDITS.txt and public/earth-night-LICENSE.txt. The globe render uses a 640px sphere raster rather than the former 440px raster.
 
-## Community exploration and audience finale
+## Direct closing question
 
-The values globe remains Home. Explore stories visits the six people in order, followed by the community explorer and one audience question. Header “Our connections” opens the explorer directly. Its five categories (Year Up, New York, Mexico, school/learning and movies/shows) are supported by the existing answers; distinct schools are explicitly not described as the same institution. Selecting a category highlights only its documented members and their routes. Related names open the corresponding full story. Filter changes retain keyboard focus on the selected filter.
+The values globe remains Home. Explore stories visits the six people in order, then goes directly to the final question. The separate community-filter page was removed at the user’s request because it repeated the opening. The header provides a “Final question” shortcut.
 
-At the user’s request, the final step now hides the globe and presents a large, centered full-screen question: “What’s one small thing that makes you feel included?” The question invites classroom conversation; no response data is collected. Map controls and member navigation are hidden only on this closing screen. Back returns to connections; the final forward control returns Home. Photos, story details, colored geographic anchors and QR destination remain intact.
+The closing screen hides Earth, portraits and map controls. A much larger centered question asks “What’s one small thing that makes you feel included?” with “Thank you for listening.” directly below it. A single 450ms fade introduces the complete closing message, skipped for reduced motion or the instant option. Back returns to Yense; forward returns Home. The audience response is for live discussion and no data is collected.
