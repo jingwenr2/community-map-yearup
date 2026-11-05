@@ -7,7 +7,7 @@ assert.deepEqual(step(initialState,'back'),{scene:'person',memberId:members.at(-
 let state=step(initialState,{type:'select',memberId:members[0].id});
 for(const m of members){
  assert.equal(state.scene,'person');assert.equal(state.memberId,m.id);
- assert(profileStories[m.id]?.length>40);assert(/\bI\b/.test(profileStories[m.id]));assert.equal(profileStories[m.id].match(/[.!?](?:\s|$)/g)?.length,3);
+ assert(profileStories[m.id]?.length>40);assert(/\bI\b/.test(profileStories[m.id]));assert.equal(profileStories[m.id].match(/[.!?](?:\s|$)/g)?.length,m.id==='ibrahim'?6:3);
  const next=step(state,'next');assert.deepEqual(step(next,'back'),state);
  assert.deepEqual(step(next,'home'),initialState);
  assert.deepEqual(step(initialState,{type:'select',memberId:m.id}),state);

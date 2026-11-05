@@ -14,7 +14,7 @@ const member=()=>members.find(m=>m.id===state.memberId);
 const avatar=(m,extra='')=>`<span class="avatar ${extra}" style="--accent:${m.color};--photo-position:${m.photoPosition||'50% 50%'};--photo-scale:${m.photoScale||1};--photo-origin:${m.photoOrigin||'50% 50%'}"><img src="${esc(m.photo)}" alt="${esc(m.name)}" draggable="false"></span>`;
 const identity=m=>`<div class="identity">${avatar(m,'profile-photo')}<div class="identity-copy"><h1 class="student-name">${m.name}</h1><p class="primary-community">${primaryCommunities[m.id]}</p></div></div>`;
 function render(){
- const m=member(),summary=state.scene==='summary';$('exhibit').dataset.scene=state.scene;
+ const m=member(),summary=state.scene==='summary';$('exhibit').dataset.scene=state.scene;$('exhibit').dataset.member=m?.id||'';
  for(const id of ['navigation','presentation-controls','motion-control','member-selector','map-information'])$(id).hidden=false;
  $('map-information').removeAttribute('open');
  $('member-selector').innerHTML=members.map(m=>{
