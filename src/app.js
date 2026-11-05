@@ -3,7 +3,7 @@ import {routes} from './connections.js';
 import {mapLabels} from './map-labels.js';
 import {initialState,step,sharedInsights,profileStories,primaryCommunities} from './scenes.js';
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let state={...initialState},busy=false,lat=24,lon=-35,scale=.94,cx=.69,cy=.45,width=0,height=0,radius=0;
+let state={...initialState},busy=false,lat=64,lon=-10,scale=.94,cx=.69,cy=.45,width=0,height=0,radius=0;
 let camera=null,texture=null,nightTexture=null,world=[],drawn=false,paintTime=0;
 let surfaceLat=null,surfaceLon=null;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),canvas=$('globe'),ctx=canvas.getContext('2d'),rad=Math.PI/180;
@@ -27,12 +27,12 @@ function render(){
  }else html=`<h1 class="scene-title">Different tracks. Shared values.</h1><p class="summary-intro">Across our tracks at Year Up United, these are the values we want to put into practice.</p><div class="shared-summary">${sharedInsights.map(i=>`<section><h2>${i.title}</h2><p>${i.text}</p></section>`).join('')}</div>`;
  $('content').innerHTML=html;$('content').scrollTop=0;
  $('progress').textContent=summary?'LCM is family':`${members.findIndex(n=>n.id===m.id)+1} of ${members.length}`;
- $('next').textContent=summary?'Next →':members.at(-1).id===m.id?'Shared summary →':'Next →';
- $('next').disabled=summary;$('back').disabled=!summary&&m.id===members[0].id;
+ $('next').textContent=summary?'Explore stories →':members.at(-1).id===m.id?'Shared summary →':'Next →';
+ $('next').disabled=false;$('back').disabled=!summary&&m.id===members[0].id;
  drawn=false;
 }
 function target(){
- const mobile=canvas.clientWidth<700,m=member(),p=m?places[m.locations[0].place]:{lat:24,lon:-35};
+ const mobile=canvas.clientWidth<700,m=member(),p=m?places[m.locations[0].place]:{lat:64,lon:-10};
  return {lat:p.lat,lon:p.lon,scale:.94,cx:mobile?.5:canvas.clientWidth<1100?.73:.70,cy:mobile?.5:.45};
 }
 async function go(action,id){
@@ -165,7 +165,8 @@ function renderPlaceMarkers(entries){
   const w=label.offsetWidth,h=label.offsetHeight,candidates=[];
   for(const distance of (e.portrait?[56,84,112,140,168]:[28,56,84,112,140]))for(const angle of [-90,-30,30,90,150,210]){
    const x=Math.max(w/2+8,Math.min(width-w/2-8,e.q.x+Math.cos(angle*rad)*distance));
-   const y=Math.max(h/2+8,Math.min(height-h/2-8,e.q.y+Math.sin(angle*rad)*distance));
+   const topInset=width>=700&&e.portrait?90:8;
+   const y=Math.max(h/2+topInset,Math.min(height-h/2-8,e.q.y+Math.sin(angle*rad)*distance));
    const overlap=placed.reduce((n,r)=>n+Math.max(0,(w+r.w)/2+10-Math.abs(x-r.x))*Math.max(0,(h+r.h)/2+8-Math.abs(y-r.y)),0);
    const coversPoint=visible.some(v=>Math.abs(x-v.q.x)<w/2+8&&Math.abs(y-v.q.y)<h/2+8);
    candidates.push({x,y,w,h,score:overlap*100+(coversPoint?10000:0)+distance});

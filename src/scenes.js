@@ -18,7 +18,7 @@ export function step(state,action){
  if(action==='connections')return {scene:'summary',memberId:null};
  const index=members.findIndex(m=>m.id===state.memberId);
  if(action==='next'){
-  if(state.scene==='summary')return state;
+  if(state.scene==='summary')return {scene:'person',memberId:members[0].id};
   return index<members.length-1?{scene:'person',memberId:members[index+1].id}:{scene:'summary',memberId:null};
  }
  if(action==='back'){
@@ -37,6 +37,6 @@ export const profileStories={
  christina:'Year Up United has helped me take on challenges and practice speaking up. I connect with Mexico through my family and culture, and I grew up in Queens. Outside the program, I enjoy baking and watching horror movies.',
  fariza:'My hometown is Aktobe, Kazakhstan, and I studied in China. My work has included education, study-abroad counseling, hospitality and my family’s retail business. Adaptability, leadership and accountability matter to me when I work across cultures.',
  jenny:'I was president of both the Math Club and Chinese Culture Club at BMCC. Only five or six people came to our first meeting, and I wanted to create fun, educational activities where members could become friends. To me, leadership means making space for others, inviting them to take part, and listening.',
- ibrahim:'I connect with Nigeria through my cultural background and with Bedford-Stuyvesant through my Brooklyn community. As a Finance student at Baruch College, I am interested in understanding how money moves throughout the world and how financial decisions shape businesses and communities. Being involved in organizations like the National Association of Black Accountants (NABA) and ASA has allowed me to connect with others, build relationships, and become more involved in my community. Through these experiences, I continue to develop my initiative, communication, teamwork, and networking skills. I value learning from people with different backgrounds and perspectives. Outside of school and professional development, I enjoy playing basketball.',
+ ibrahim:'My cultural roots connect me to Nigeria, and my Brooklyn community connects me to Bed-Stuy. I study Finance at Baruch College and want to understand how money shapes businesses and communities. Through NABA and ASA, I’m building friendships, communication skills and professional connections. I enjoy learning from different perspectives—and playing basketball.',
  yense:'I feel most connected to Mexico, where people make me feel loved and welcome. I was born in New York and raised in Queens, and I love exploring places, watching movies and spending time on my own. I’m often quiet because I like to focus, but being included and spoken to regularly makes me feel welcome.'
 };

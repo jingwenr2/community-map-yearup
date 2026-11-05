@@ -85,10 +85,3 @@ input{accent-color:var(--teal);width:16px;height:16px;margin:0}
 @media(max-width:700px){.map-portrait{width:48px;height:48px}.place-name.portrait-pin{min-width:58px}}
 .place-marker:hover .place-name.portrait-pin,.place-marker:focus-visible .place-name.portrait-pin{background:none;color:#f3f7f8}
 .place-marker:active:not(:disabled){transform:translate(-50%,-50%)}
-
-@media(min-width:701px){
- #exhibit[data-member=ibrahim] #content{width:min(520px,40vw)}
- #exhibit[data-member=ibrahim] .profile-photo{width:130px;height:156px}
- #exhibit[data-member=ibrahim] .identity{margin-bottom:24px}
- #exhibit[data-member=ibrahim] .personal-story{font-size:16px;line-height:1.6}
-}
