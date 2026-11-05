@@ -10,7 +10,6 @@ export const places = {
   newyork:{country:'United States',flag:'🇺🇸',region:'new-york',name:'New York',lat:40.7128,lon:-74.0060},
   queens:{country:'United States',flag:'🇺🇸',region:'new-york',name:'Queens, New York',lat:40.7282,lon:-73.7949},
   colombia:{country:'Colombia',flag:'🇨🇴',name:'Colombia',lat:4.57,lon:-74.30,countryLevel:true},
-  bronx:{country:'United States',flag:'🇺🇸',region:'new-york',name:'Bronx, New York',lat:40.8448,lon:-73.8648},
   mexico:{country:'Mexico',flag:'🇲🇽',name:'Mexico',lat:23.63,lon:-102.55,countryLevel:true},
   aktobe:{country:'Kazakhstan',flag:'🇰🇿',name:'Aktobe, Kazakhstan',lat:50.2839,lon:57.167},
   china:{country:'China',flag:'🇨🇳',name:'China',lat:35.86,lon:104.20,countryLevel:true},
@@ -29,10 +28,10 @@ export const members = [
    locations:[{place:'colombia',types:['roots'],detail:'Family roots in Colombia.'},{place:'queens',types:['home','culture'],detail:'Current home and New Yorker identity.'}]},
   {id:'christina',name:'Christina',shortName:'Christina',initials:'C',color:'#a8dccc',secondaryColor:'#879fae',symbol:'✦',photo:'./public/photos/christina.jpg',photoPosition:'50% 20%',photoScale:1.8,photoOrigin:'48% 14%',
    headline:'Growing by speaking up.',subtitle:'Year Up · baking · movies',
-   story:'Christina is from Mexico, with family roots and cultural connections through both of her parents. Her supplied New York connections include the Bronx and Queens. Year Up United helped her embrace challenges and practice speaking up.',
+   story:'Christina is from Mexico, with family roots and cultural connections through both of her parents. She grew up in Queens. Year Up United helped her embrace challenges and practice speaking up.',
    communities:['Year Up United'],interests:['Horror movies','Baking','Pistachio cake','Art the Clown'],languages:['English','Spanish'],colors:['Blue-gray','Mint green'],
    belonging:'Embracing challenges and practicing speaking up are part of her growth through Year Up United.',
-   locations:[{place:'mexico',types:['roots','culture'],detail:'Christina is from Mexico, with family roots and cultural connections through both parents.'},{place:'bronx',types:['birthplace'],detail:'Birthplace.'},{place:'queens',types:['upbringing'],detail:'Where she grew up.'}]},
+   locations:[{place:'mexico',types:['roots','culture'],detail:'Christina is from Mexico, with family roots and cultural connections through both parents.'},{place:'queens',types:['upbringing'],detail:'Where she grew up.'}]},
   {id:'fariza',name:'Fariza',shortName:'Fariza',initials:'F',color:'#87bd78',symbol:'◆',photo:'./public/photos/fariza.jpeg',photoPosition:'50% 0%',photoScale:1.15,photoOrigin:'50% 0%',
    headline:'Connection across cultures.',subtitle:'Education · enterprise · adaptability',
    story:'Fariza’s hometown is Aktobe, Kazakhstan. She studied in China and maintains business connections there. Her experience spans education, study-abroad counseling, entrepreneurship, hospitality, and a family retail business. Adaptability, leadership, accountability, and working across cultures are central to her story.',
@@ -61,7 +60,7 @@ export const members = [
 
 ];
 export const insights = [
- {number:'01',title:'New York, a shared thread',text:'New York connections appear across Ricardo, Christina, Jenny, Ibrahim, and Yense, with distinct stories in Queens, the Bronx, and Brooklyn.'},
+ {number:'01',title:'New York, a shared thread',text:'New York connections appear across Ricardo, Christina, Jenny, Ibrahim, and Yense, with distinct stories in Queens and Brooklyn.'},
  {number:'02',title:'Opportunity through Year Up',text:'Ricardo, Christina, and Ibrahim explicitly mention Year Up United. Ricardo and Ibrahim also describe learning to navigate corporate environments.'},
  {number:'03',title:'Many ways to find your people',text:'Comedy, movies, baking, entrepreneurship, student leadership, and sports offer different ways to connect beyond geography or nationality.'},
  {number:'04',title:'Belonging is something we practice',text:'The responses emphasize listening, respect, openness, making space for personality, inviting participation, and including quieter people.'}

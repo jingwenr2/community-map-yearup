@@ -21,7 +21,8 @@ assert(!byId.jenny.languages);assert(!byId.fariza.locations.some(l=>l.types.incl
 assert.equal(Object.values(places).filter(p=>p.countryLevel).length,4);
 assert.equal(distanceKm(places.queens,places.queens),0);
 assert(Math.abs(distanceKm({lat:0,lon:0},{lat:0,lon:90})-10007.5)<1);
-assert.equal(routes.filter(r=>r.newYork).length,8);
+assert.equal(routes.filter(r=>r.newYork).length,7);
+assert.deepEqual(byId.christina.locations.map(l=>l.place),['mexico','queens']);
 assert(routes.filter(r=>r.member.id==='fariza').every(r=>!r.newYork));
 for(const route of routes){assert(Number.isFinite(route.distance)&&route.distance>0);const points=arcPoints(route.from,route.to);assert(Math.abs(points[0][0]-route.from.lon)<1e-6);assert(Math.abs(points.at(-1)[1]-route.to.lat)<1e-6);}
 const geography=JSON.parse(await readFile('public/world.geo.json','utf8'));assert(geography.features.length>100);
