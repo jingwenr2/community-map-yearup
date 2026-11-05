@@ -55,6 +55,8 @@ function syncMotion(){if(camera&&instant())camera.duration=0;drawn=false;}
 $('instant').onchange=()=>{try{localStorage.setItem('yearup-reduce-motion',String($('instant').checked));}catch{}syncMotion();};reduced.addEventListener('change',syncMotion);
 function project(latitude,longitude,lift=1){const a=latitude*rad,b=(longitude-lon)*rad,c=lat*rad;return {x:width*cx+radius*Math.cos(a)*Math.sin(b)*lift,y:height*cy-radius*(Math.cos(c)*Math.sin(a)-Math.sin(c)*Math.cos(a)*Math.cos(b))*lift,z:Math.sin(c)*Math.sin(a)+Math.cos(c)*Math.cos(a)*Math.cos(b)};}
 function line(points,color,arched=false){
+ // A hidden endpoint must not leave a floating, unfinished connection above Earth.
+ if(arched&&[points[0],points.at(-1)].some(([lo,la])=>project(la,lo).z<=.02))return;
  ctx.save();ctx.beginPath();let pen=false;
  for(let index=0;index<points.length;index++){
   const [lo,la]=points[index],lift=arched?1.008+.11*Math.sin(Math.PI*index/(points.length-1)):1.008;
@@ -62,7 +64,7 @@ function line(points,color,arched=false){
   if(p.z>.01){if(pen)ctx.lineTo(p.x,p.y);else ctx.moveTo(p.x,p.y);pen=true;}else pen=false;
  }
  ctx.strokeStyle=color;ctx.lineWidth=arched?1.25:.65;
- if(arched){ctx.shadowColor='#e7b968';ctx.shadowBlur=4;}
+ if(arched){ctx.shadowColor=color;ctx.shadowBlur=4;}
  ctx.stroke();ctx.restore();
 }
 
@@ -113,10 +115,10 @@ function draw(){
  let visible=[];
  if(state.scene==='person'){
   const m=member();visible=m.locations.map((l,index)=>({m,l,portrait:index===0}));
-  for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,'#edc17ce0',true);
+  for(const route of routes.filter(r=>r.member.id===m.id))line(route.points,route.member.color,true);
  }else{
   visible=members.flatMap(m=>{const local=m.locations.find(l=>places[l.place].region==='new-york');return [{m,l:m.locations[0],portrait:true},...(local&&local!==m.locations[0]?[{m,l:local}]:[])];});
-  for(const route of routes)line(route.points,'#edc17caa',true);
+  for(const route of routes)line(route.points,route.member.color,true);
  }
  renderPlaceMarkers(visible);
  drawMapLabels();
@@ -154,7 +156,7 @@ function renderPlaceMarkers(entries){
   let button=$('markers').querySelector(`[data-marker-key="${key}"]`);
   if(!button){button=document.createElement('button');button.className='place-marker';button.dataset.markerKey=key;button.innerHTML='<span class="place-name"></span>';$('markers').append(button);}
   button.dataset.member=e.m.id;
-  button.style.left=e.q.x+'px';button.style.top=e.q.y+'px';button.dataset.anchorX=e.q.x;button.dataset.anchorY=e.q.y;
+  button.style.setProperty('--member-color',e.m.color);button.style.left=e.q.x+'px';button.style.top=e.q.y+'px';button.dataset.anchorX=e.q.x;button.dataset.anchorY=e.q.y;
   const label=button.querySelector('.place-name');
   if(e.portrait){
    label.classList.add('portrait-pin');
@@ -173,7 +175,10 @@ function renderPlaceMarkers(entries){
   label.style.left=(22+dx)+'px';label.style.top=(22+dy)+'px';
   button.title=`${e.people.join(', ')} · ${p.name} · ${e.l.types.map(t=>connectionTypes[t].label).join(' / ')}`;
   button.setAttribute('aria-label',button.title);button.setAttribute('aria-pressed',String(state.memberId===e.m.id));
-  leaders+=`<line x1="${e.q.x}" y1="${e.q.y}" x2="${best.x}" y2="${best.y}" stroke="#557c76"/>`;
+  // Continue the same member-colored connection into the portrait itself.
+  const portrait=label.querySelector('.map-portrait');
+  const portraitY=portrait?best.y-h/2+portrait.offsetHeight/2:best.y;
+  leaders+=`<line x1="${e.q.x}" y1="${e.q.y}" x2="${best.x}" y2="${portraitY}" stroke="${e.m.color}"/>`;
  }
  for(const button of [...$('markers').children])if(!active.has(button.dataset.markerKey))button.remove();
  $('marker-leaders').innerHTML=leaders;
